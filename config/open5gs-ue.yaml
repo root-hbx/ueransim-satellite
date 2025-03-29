@@ -31,7 +31,7 @@ tunNetmask: '255.255.255.0'
 
 # List of gNB IP addresses for Radio Link Simulation
 gnbSearchList:
-  - 127.0.0.1
+  - 172.16.122.133 # ens34 of ueransim machine
 
 # UAC Access Identities Configuration
 uacAic:
