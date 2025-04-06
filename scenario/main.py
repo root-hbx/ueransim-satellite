@@ -2,7 +2,7 @@ import os
 import subprocess
 import time
 import logging
-from network_sim import perform_ping_test
+from network_sim import ping_test, iperf_tcp_test, iperf_udp_test
 
 # Pls replace with your own path
 ROOT_DIR = "/Users/huluobo/Github_Content/ueransim-satellite"
@@ -52,11 +52,12 @@ def start_ue(
 
 
 def run_scenario():
+    """Constructing the scenario with gNB and UE"""
     print("Scenario Creating...")
 
-    print("======================================================")
+    print("=======================================================")
     print("== Phase 1: Traffic through CoreNet 1 (10.45.0.0/16) ==")
-    print("======================================================")
+    print("=======================================================")
 
     gnb1_process = None
     ue1_process = None
@@ -66,29 +67,48 @@ def run_scenario():
     ue1_process = start_ue("config/open5gs1-ue.yaml")
     time.sleep(3) # Wait for UE to complete
 
-    # ping -I uersimtun0 172.16.162.135 via open5gs1
-    perform_ping_test(
+    # ping -I uesimtun0 172.16.162.135 via open5gs1
+    ping_test(
         target_ip="172.16.162.135",
-        interface="uersimtun0",
+        interface="uesimtun0",
         count=10,
+        output_file="./test/ping_open5gs1.txt",
         corenet_name="open5gs1"
     )
 
-    # TODO(bxhu): Start to Observe Traffic Performance (Probe)
+    # TODO(bxhu): Start to Observe Traffic Performance (TCP/UDP Probe)
+    # iperf -c 172.16.162.135 -B uesimtun0 > ./test/iperf_tcp.txt 2>&1
+    iperf_tcp_test(
+        server_ip="172.16.162.135",
+        interface="uesimtun0",
+        output_file="./test/iperf_tcp_open5gs1.txt",
+        corenet_name="open5gs1",
+        duration=120,
+        interval=5
+    )
+    # iperf -u -c 172.16.162.135 -B uesimtun0 > ./test/iperf_tcp.txt 2>&1
+    iperf_udp_test(
+        server_ip="172.16.162.135",
+        interface="uesimtun0",
+        output_file="./test/iperf_udp_open5gs1.txt",
+        corenet_name="open5gs1",
+        duration=120,
+        interval=5
+    )
 
     print("Waiting for 2 minutes, currently interacting with open5gs1...")
-    time.sleep(120)
+    time.sleep(160)
 
     terminate_processes(gnb1_process, ue1_process)
 
-    print("======================================================")
-    print("Waiting for 5 seconds before starting the next phase")
-    print("======================================================")
+    print("==========================================================")
+    print("== Waiting for 5 seconds before starting the next phase ==")
+    print("==========================================================")
     time.sleep(5)
 
-    print("======================================================")
+    print("=======================================================")
     print("== Phase 2: Traffic through CoreNet 2 (10.42.0.0/16) ==")
-    print("======================================================")
+    print("=======================================================")
 
     gnb2_process = None
     ue2_process = None
@@ -98,18 +118,37 @@ def run_scenario():
     ue2_process = start_ue("config/open5gs2-ue.yaml")
     time.sleep(3) # Wait for UE to complete
 
-    # ping -I uersimtun0 172.16.162.135 via open5gs2
-    perform_ping_test(
+    # ping -I uesimtun0 172.16.162.135 via open5gs2
+    ping_test(
         target_ip="172.16.162.135",
-        interface="uersimtun0",
+        interface="uesimtun0",
         count=10,
+        output_file="./test/ping_open5gs2.txt",
         corenet_name="open5gs2"
     )
 
-    # TODO(bxhu): Start to Observe Traffic Performance (Probe)
+    # TODO(bxhu): Start to Observe Traffic Performance (TCP/UDP Probe)
+    # iperf -c 172.16.162.135 -B uesimtun0 > ./test/iperf_tcp.txt 2>&1
+    iperf_tcp_test(
+        server_ip="172.16.162.135",
+        interface="uesimtun0",
+        output_file="./test/iperf_tcp_open5gs2.txt",
+        corenet_name="open5gs2",
+        duration=120,
+        interval=5
+    )
+    # iperf -u -c 172.16.162.135 -B uesimtun0 > ./test/iperf_tcp.txt 2>&1
+    iperf_udp_test(
+        server_ip="172.16.162.135",
+        interface="uesimtun0",
+        output_file="./test/iperf_udp_open5gs2.txt",
+        corenet_name="open5gs2",
+        duration=120,
+        interval=5
+    )
 
     print("Waiting for 2 minutes, currently interacting with open5gs2...")
-    time.sleep(120)
+    time.sleep(160)
 
     terminate_processes(gnb2_process, ue2_process)
 

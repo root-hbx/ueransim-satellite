@@ -1,20 +1,30 @@
 import subprocess
 import logging
 import sys
+import os
 
-def perform_ping_test(
+
+def ensure_dir(file_path):
+    directory = os.path.dirname(file_path)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+def ping_test(
     target_ip: str,
-    interface: str = "uersimtun0",
-    count: int = 5,
+    interface: str = "uesimtun0",
+    count: int = 15,
+    output_file: str = "./test/ping.txt",
     corenet_name: str = ""
 ) -> bool:
     """
-    ping -I uersimtun0 172.16.162.135 via open5gsX
+    ping -I uesimtun0 172.16.162.135 > ./test/ping.txt 2>&1
 
     Args:
         target_ip: target IP address (free5gc VM, for test)
-        interface: net interface, default uersimtun0
+        interface: net interface, default uesimtun0
         count: ping pkt num
+        output_file: output file path
         corenet_name: corenet name, for logging
 
     Returns:
@@ -23,73 +33,149 @@ def perform_ping_test(
 
     logging.info(f"Ping Test: Transmitting {count} packets to {target_ip} "
                 f"via {corenet_name if corenet_name else interface}...")
-
+    ensure_dir(output_file)
     ping_cmd = ["sudo", "ping", "-I", interface, "-c", str(count), target_ip]
 
+    print("========================================================")
+    print(f"=== PING Test {target_ip} via {corenet_name} ===")
+    print("========================================================")
+
     try:
-        # `Popen` for real-time output
-        # `Run` is not supportive for real-time output
-        process = subprocess.Popen(
-            ping_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            bufsize=1,  # line-buffered
-            universal_newlines=True
-        )
-
-        success = True
-        stdout_lines = []
-
-        # Real-time output for stdout
-        print("============================================")
-        print(f"=== PING {target_ip} via {corenet_name} ===")
-        print("============================================")
-        for line in process.stdout:
-            line = line.strip()
-            stdout_lines.append(line)
-            print(f">> {line}")
-            sys.stdout.flush()
-
-        '''
-        Return code = process.wait() should be the very first.
-        Since `process.wait()` will block the process until it finishes,
-        we can read the stdout and stderr after process ends (process safety).
-        '''
-
-        # Wait for the process to finish and get the return code
-        return_code = process.wait()
-
-        # Check for errors in stderr
-        stderr = process.stderr.read()
-        if stderr:
-            print(f"ERROR: {stderr}")
-            logging.error(f"Ping Error: {stderr}")
-            success = False
-
-        # Output -> Logging
-        full_output = "\n".join(stdout_lines)
-
-        # Check for process return code
-        if return_code == 0:
-            logging.info(f"Ping Test Successful - {corenet_name}")
-            logging.info(full_output)
-            print("====== PING Completed Successfully ======")
-        else:
-            logging.error(f"Ping Test Failed - {corenet_name}")
-            logging.error(full_output)
-            print("====== PING Failed ======")
-            success = False
-
-        return success
-    except subprocess.TimeoutExpired:
-        print(f"====== PING Timeout - {corenet_name} ======")
-        logging.error(f"Ping Test Timeout - {corenet_name}")
-        return False
-    except KeyboardInterrupt:
-        print("\n====== PING Interrupted by User ======")
+        # Use subprocess.run to execute the command and redirect output
+        with open(output_file, 'w') as out_file:
+            process = subprocess.run(
+                ping_cmd,
+                stdout=out_file,
+                stderr=subprocess.STDOUT,
+                check=True
+            )
+        print("====== PING Completed Successfully ======")
+        logging.info(f"Ping Test Successful - {corenet_name}")
+        return True
+    except subprocess.CalledProcessError as e:
+        print("====== PING Failed ======")
+        logging.error(f"Ping Test Failed - {corenet_name}: {str(e)}")
         return False
     except Exception as e:
         print(f"====== PING Error: {str(e)} ======")
         logging.error(f"Ping Test Error: {str(e)}")
+        return False
+
+
+def iperf_tcp_test(
+    server_ip: str,
+    interface: str = "uesimtun0",
+    output_file: str = "./test/iperf_tcp.txt",
+    corenet_name: str = "",
+    duration: int = 120,
+    interval: int = 5,
+) -> bool:
+    """
+    iperf -c 172.16.162.135 -B uesimtun0 -t 120 -i 5 > ./test/iperf_tcp.txt 2>&1
+
+    Args:
+        server_ip: Server IP address (free5gc VM, for test)
+        interface: net interface, default uesimtun0
+        output_file: output file path
+        corenet_name: corenet name, for logging
+
+    Return:
+        bool: True if iperf is successful, False otherwise
+    """
+
+    logging.info(f"iperf Test (TCP): Connecting to {server_ip} "
+                f"via {corenet_name if corenet_name else interface}...")
+    ensure_dir(output_file)
+    iperf_cmd = [
+        "sudo",
+        "iperf",
+        "-c", server_ip,
+        "-B", interface,
+        "-t", str(duration),
+        "-i", str(interval),
+    ]
+
+    print("========================================================")
+    print(f"=== iPerf TCP Test {server_ip} via {corenet_name} ===")
+    print("========================================================")
+
+    try:
+        # Use subprocess.run to execute the command and redirect output
+        with open(output_file, 'w') as out_file:
+            process = subprocess.run(
+                iperf_cmd,
+                stdout=out_file,
+                stderr=subprocess.STDOUT,
+                check=True
+            )
+        print("====== iPerf Completed Successfully ======")
+        logging.info(f"iPerf Test Successful - {corenet_name}")
+        return True
+    except subprocess.CalledProcessError as e:
+        print("====== iPerf Failed ======")
+        logging.error(f"iPerf Test Failed - {corenet_name}: {str(e)}")
+        return False
+    except Exception as e:
+        print(f"====== iPerf Error: {str(e)} ======")
+        logging.error(f"iPerf Test Error: {str(e)}")
+        return False
+
+
+def iperf_udp_test(
+    server_ip: str,
+    interface: str = "uesimtun0",
+    output_file: str = "./test/iperf_udp.txt",
+    corenet_name: str = "",
+    duration: int = 120,
+    interval: int = 5,
+) -> bool:
+    """
+    iperf -u -c 172.16.162.135 -B uesimtun0 -t 120 -i 5 > ./test/iperf_udp.txt 2>&1
+
+    Args:
+        server_ip: Server IP address (free5gc VM, for test)
+        interface: net interface, default uesimtun0
+        output_file: output file path
+        corenet_name: corenet name, for logging
+
+    Returns:
+        bool: True if iperf is successful, False otherwise
+    """
+
+    logging.info(f"iperf Test (UDP): Connecting to {server_ip} "
+                f"via {corenet_name if corenet_name else interface}...")
+    ensure_dir(output_file)
+    iperf_cmd = [
+        "sudo",
+        "iperf",
+        "-u", 
+        "-c", server_ip,
+        "-B", interface,
+        "-t", str(duration),
+        "-i", str(interval),
+    ]
+
+    print("========================================================")
+    print(f"=== iPerf UDP Test {server_ip} via {corenet_name} ===")
+    print("========================================================")
+
+    try:
+        # Use subprocess.run to execute the command and redirect output
+        with open(output_file, 'w') as out_file:
+            process = subprocess.run(
+                iperf_cmd,
+                stdout=out_file,
+                stderr=subprocess.STDOUT,
+                check=True
+            )
+        print("====== iPerf Completed Successfully ======")
+        logging.info(f"iPerf Test Successful - {corenet_name}")
+        return True
+    except subprocess.CalledProcessError as e:
+        print("====== iPerf Failed ======")
+        logging.error(f"iPerf Test Failed - {corenet_name}: {str(e)}")
+        return False
+    except Exception as e:
+        print(f"====== iPerf Error: {str(e)} ======")
+        logging.error(f"iPerf Test Error: {str(e)}")
         return False
