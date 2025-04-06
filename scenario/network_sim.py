@@ -64,18 +64,19 @@ def ping_test(
 
 def iperf_tcp_test(
     server_ip: str,
-    interface: str = "uesimtun0",
+    interface_ip: str,
     output_file: str = "./test/iperf_tcp.txt",
     corenet_name: str = "",
     duration: int = 120,
     interval: int = 5,
 ) -> bool:
     """
-    iperf -c 172.16.162.135 -B uesimtun0 -t 120 -i 5 > ./test/iperf_tcp.txt 2>&1
+    Server: iperf -s -B 10.42.0.1
+    Client: iperf -c 10.42.0.1 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_tcp.txt 2>&1
 
     Args:
         server_ip: Server IP address (free5gc VM, for test)
-        interface: net interface, default uesimtun0
+        interfaceIP: net interface ip, default uesimtun0 (10.45.0.2 / 10.42.0.2)
         output_file: output file path
         corenet_name: corenet name, for logging
 
@@ -84,15 +85,15 @@ def iperf_tcp_test(
     """
 
     logging.info(f"iperf Test (TCP): Connecting to {server_ip} "
-                f"via {corenet_name if corenet_name else interface}...")
+                f"via {corenet_name if corenet_name else interface_ip}...")
     ensure_dir(output_file)
     iperf_cmd = [
         "sudo",
         "iperf",
         "-c", server_ip,
-        "-B", interface,
         "-t", str(duration),
         "-i", str(interval),
+        "--bind", interface_ip,
     ]
 
     print("========================================================")
@@ -123,18 +124,19 @@ def iperf_tcp_test(
 
 def iperf_udp_test(
     server_ip: str,
-    interface: str = "uesimtun0",
+    interface_ip: str,
     output_file: str = "./test/iperf_udp.txt",
     corenet_name: str = "",
     duration: int = 120,
     interval: int = 5,
 ) -> bool:
     """
-    iperf -u -c 172.16.162.135 -B uesimtun0 -t 120 -i 5 > ./test/iperf_udp.txt 2>&1
+    Server: iperf -s -B 10.42.0.1
+    Client: iperf -u -c 10.42.0.1 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_udp.txt 2>&1
 
     Args:
         server_ip: Server IP address (free5gc VM, for test)
-        interface: net interface, default uesimtun0
+        interface_ip: net interface ip, default uesimtun0 (10.45.0.2 / 10.42.0.2)
         output_file: output file path
         corenet_name: corenet name, for logging
 
@@ -143,16 +145,16 @@ def iperf_udp_test(
     """
 
     logging.info(f"iperf Test (UDP): Connecting to {server_ip} "
-                f"via {corenet_name if corenet_name else interface}...")
+                f"via {corenet_name if corenet_name else interface_ip}...")
     ensure_dir(output_file)
     iperf_cmd = [
         "sudo",
         "iperf",
         "-u", 
         "-c", server_ip,
-        "-B", interface,
         "-t", str(duration),
         "-i", str(interval),
+        "--bind", interface_ip,
     ]
 
     print("========================================================")

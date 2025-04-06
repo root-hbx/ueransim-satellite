@@ -5,11 +5,11 @@ import logging
 from network_sim import ping_test, iperf_tcp_test, iperf_udp_test
 
 # Pls replace with your own path
-ROOT_DIR = "/Users/huluobo/Github_Content/ueransim-satellite"
+ROOT_DIR = "/home/ueransim/ueransim-satellite"
 
 def terminate_processes(
-    gnb_process: subprocess.Popen | None, 
-    ue_process: subprocess.Popen | None
+    gnb_process: subprocess.Popen, 
+    ue_process: subprocess.Popen
 ) -> None:
     '''Terminate gNB and UE processes'''
     if gnb_process:
@@ -54,7 +54,6 @@ def start_ue(
 def run_scenario():
     """Constructing the scenario with gNB and UE"""
     print("Scenario Creating...")
-
     print("=======================================================")
     print("== Phase 1: Traffic through CoreNet 1 (10.45.0.0/16) ==")
     print("=======================================================")
@@ -77,19 +76,25 @@ def run_scenario():
     )
 
     # TODO(bxhu): Start to Observe Traffic Performance (TCP/UDP Probe)
-    # iperf -c 172.16.162.135 -B uesimtun0 > ./test/iperf_tcp.txt 2>&1
+    """
+    - Server: iperf -s -B 10.45.0.1
+    - Client: iperf -u -c 10.45.0.1 -t 120 -i 5 --bind 10.45.0.2 > ./test/iperf_tcp.txt 2>&1
+    """
     iperf_tcp_test(
-        server_ip="172.16.162.135",
-        interface="uesimtun0",
+        server_ip="10.45.0.1",
+        interface="10.45.0.2",
         output_file="./test/iperf_tcp_open5gs1.txt",
         corenet_name="open5gs1",
         duration=120,
         interval=5
     )
-    # iperf -u -c 172.16.162.135 -B uesimtun0 > ./test/iperf_tcp.txt 2>&1
+    """
+    - Server: iperf -s -B 10.45.0.1
+    - Client: iperf -u -c 10.45.0.1 -t 120 -i 5 --bind 10.45.0.2 > ./test/iperf_udp.txt 2>&1
+    """
     iperf_udp_test(
-        server_ip="172.16.162.135",
-        interface="uesimtun0",
+        server_ip="10.45.0.1",
+        interface="10.45.0.2",
         output_file="./test/iperf_udp_open5gs1.txt",
         corenet_name="open5gs1",
         duration=120,
@@ -128,19 +133,25 @@ def run_scenario():
     )
 
     # TODO(bxhu): Start to Observe Traffic Performance (TCP/UDP Probe)
-    # iperf -c 172.16.162.135 -B uesimtun0 > ./test/iperf_tcp.txt 2>&1
+    """
+    - Server: iperf -s -B 10.42.0.1
+    - Client: iperf -u -c 10.42.0.1 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_tcp.txt 2>&1
+    """
     iperf_tcp_test(
-        server_ip="172.16.162.135",
-        interface="uesimtun0",
+        server_ip="10.42.0.1",
+        interface="10.42.0.2",
         output_file="./test/iperf_tcp_open5gs2.txt",
         corenet_name="open5gs2",
         duration=120,
         interval=5
     )
-    # iperf -u -c 172.16.162.135 -B uesimtun0 > ./test/iperf_tcp.txt 2>&1
+    """
+    - Server: iperf -s -B 10.42.0.1
+    - Client: iperf -u -c 10.42.0.1 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_udp.txt 2>&1
+    """
     iperf_udp_test(
-        server_ip="172.16.162.135",
-        interface="uesimtun0",
+        server_ip="10.42.0.1",
+        interface="10.42.0.2",
         output_file="./test/iperf_udp_open5gs2.txt",
         corenet_name="open5gs2",
         duration=120,
