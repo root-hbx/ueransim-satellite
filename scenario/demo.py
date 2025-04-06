@@ -5,6 +5,10 @@ import sys
 import logging
 from network_sim import ping_test, iperf_tcp_test, iperf_udp_test
 
+"""
+Demo for Meeting: Take Open5GS-2 as an example
+"""
+
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 
@@ -29,7 +33,6 @@ def admin():
         logging.error(f"Invalid Permissions: {e}")
         print("Failed! Plz check for your password as a root admin :(")
         sys.exit(1)
-
 
 def terminate_processes(
     gnb_process: subprocess.Popen, 
@@ -81,56 +84,6 @@ def start_ue(
 
 
 def run_scenario():
-    """Constructing the scenario with gNB and UE"""
-    print("Scenario Creating...")
-    print("=======================================================")
-    print("== Phase 1: Traffic through CoreNet 1 (10.45.0.0/16) ==")
-    print("=======================================================")
-
-    gnb1_process = None
-    ue1_process = None
-
-    gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
-    time.sleep(3) # Wait for gNB to complete
-    ue1_process = start_ue("config/open5gs1-ue.yaml")
-    time.sleep(3) # Wait for UE to complete
-
-    # ping -I uesimtun0 172.16.162.135 via open5gs1
-    ping_test(
-        target_ip="172.16.162.135",
-        interface="uesimtun0",
-        count=10,
-        output_file="./test/ping_open5gs1.txt",
-        corenet_name="open5gs1"
-    )
-
-    # TODO(bxhu): Start to Observe Traffic Performance (TCP/UDP Probe)
-    """
-    - Server: iperf -s -B 10.45.0.1
-    - Client: iperf -u -c 10.45.0.1 -t 120 -i 5 --bind 10.45.0.2 > ./test/iperf_tcp.txt 2>&1
-    """
-    iperf_tcp_test(
-        server_ip="10.45.0.1",
-        interface="10.45.0.2",
-        output_file="./test/iperf_tcp_open5gs1.txt",
-        corenet_name="open5gs1",
-        duration=120,
-        interval=5
-    )
-    """
-    - Server: iperf -s -B 10.45.0.1
-    - Client: iperf -u -c 10.45.0.1 -t 120 -i 5 --bind 10.45.0.2 > ./test/iperf_udp.txt 2>&1
-    """
-    iperf_udp_test(
-        server_ip="10.45.0.1",
-        interface="10.45.0.2",
-        output_file="./test/iperf_udp_open5gs1.txt",
-        corenet_name="open5gs1",
-        duration=120,
-        interval=5
-    )
-
-    terminate_processes(gnb1_process, ue1_process)
 
     print("==========================================================")
     print("== Waiting for 5 seconds before starting the next phase ==")
