@@ -2,7 +2,9 @@ import os
 import subprocess
 import time
 import logging
+from network_sim import perform_ping_test
 
+# Pls replace with your own path
 ROOT_DIR = "/Users/huluobo/Github_Content/ueransim-satellite"
 
 def terminate_processes(
@@ -55,15 +57,24 @@ def run_scenario():
     print("======================================================")
     print("== Phase 1: Traffic through CoreNet 1 (10.45.0.0/16) ==")
     print("======================================================")
-    
+
     gnb1_process = None
     ue1_process = None
-    
+
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     time.sleep(3) # Wait for gNB to complete
     ue1_process = start_ue("config/open5gs1-ue.yaml")
+    time.sleep(3) # Wait for UE to complete
 
-    #TODO(bxhu): add `ping -I uersimtun0 192.168.0.1` via open5gs1
+    # ping -I uersimtun0 172.16.162.135 via open5gs1
+    perform_ping_test(
+        target_ip="172.16.162.135",
+        interface="uersimtun0",
+        count=10,
+        corenet_name="open5gs1"
+    )
+
+    # TODO(bxhu): Start to Observe Traffic Performance (Probe)
 
     print("Waiting for 2 minutes, currently interacting with open5gs1...")
     time.sleep(120)
@@ -85,8 +96,17 @@ def run_scenario():
     gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
     time.sleep(3) # Wait for gNB to complete
     ue2_process = start_ue("config/open5gs2-ue.yaml")
-    
-    #TODO(bxhu): add `ping -I uersimtun0 192.168.0.1` via open5gs2
+    time.sleep(3) # Wait for UE to complete
+
+    # ping -I uersimtun0 172.16.162.135 via open5gs2
+    perform_ping_test(
+        target_ip="172.16.162.135",
+        interface="uersimtun0",
+        count=10,
+        corenet_name="open5gs2"
+    )
+
+    # TODO(bxhu): Start to Observe Traffic Performance (Probe)
 
     print("Waiting for 2 minutes, currently interacting with open5gs2...")
     time.sleep(120)
