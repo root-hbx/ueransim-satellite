@@ -18,6 +18,7 @@ OPEN5GS2_IP = "10.42.0.1"
 UERSIMTUN1_IP = "10.45.0.2"
 UERSIMTUN2_IP = "10.42.0.2"
 
+logging.basicConfig(level=logging.INFO)
 
 def admin():
     """

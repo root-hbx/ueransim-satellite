@@ -8,6 +8,8 @@ Network Helpers for Main
 Should be used in main.py, running on UERANSIM machine
 """
 
+logging.basicConfig(level=logging.INFO)
+
 def ensure_dir(file_path):
     directory = os.path.dirname(file_path)
     if directory and not os.path.exists(directory):

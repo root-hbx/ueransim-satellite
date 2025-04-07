@@ -6,6 +6,8 @@ import logging
 This script should be run on free5gc machine
 """
 
+logging.basicConfig(level=logging.INFO)
+
 def ensure_dir(file_path):
     directory = os.path.dirname(file_path)
     if directory and not os.path.exists(directory):
