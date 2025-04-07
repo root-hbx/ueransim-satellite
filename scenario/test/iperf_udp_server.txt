@@ -1,7 +1,28 @@
+
+========================================================
+New UDP Server Session Started at: Mon Apr  7 17:41:50 CST 2025
+========================================================
 ------------------------------------------------------------
 Server listening on UDP port 5001
 UDP buffer size:  224 KByte (default)
 ------------------------------------------------------------
-[  1] local 198.19.249.234 port 5001 connected with 198.19.249.157 port 57787
+[  1] local 198.19.249.234 port 5001 connected with 198.19.249.157 port 57666
 [ ID] Interval       Transfer     Bandwidth        Jitter   Lost/Total Datagrams
-[  1] 0.0000-120.0019 sec  15.0 MBytes  1.05 Mbits/sec   0.009 ms 0/10700 (0%)
+[  1] 0.0000-30.0135 sec  3.75 MBytes  1.05 Mbits/sec   0.028 ms 0/2676 (0%)
+[  2] local 198.19.249.234 port 5001 connected with 198.19.249.157 port 36937
+[ ID] Interval       Transfer     Bandwidth        Jitter   Lost/Total Datagrams
+[  2] 0.0000-30.0117 sec  3.75 MBytes  1.05 Mbits/sec   0.001 ms 0/2676 (0%)
+[  3] local 198.19.249.234 port 5001 connected with 198.19.249.157 port 55326
+[ ID] Interval       Transfer     Bandwidth        Jitter   Lost/Total Datagrams
+[  3] 0.0000-30.0014 sec  3.75 MBytes  1.05 Mbits/sec   0.012 ms 0/2675 (0%)
+
+========================================================
+New UDP Server Session Started at: Mon Apr  7 17:45:25 CST 2025
+========================================================
+------------------------------------------------------------
+Server listening on UDP port 5001
+UDP buffer size:  224 KByte (default)
+------------------------------------------------------------
+[  1] local 198.19.249.234 port 5001 connected with 198.19.249.157 port 37326
+[ ID] Interval       Transfer     Bandwidth        Jitter   Lost/Total Datagrams
+[  1] 0.0000-30.0018 sec  3.75 MBytes  1.05 Mbits/sec   0.001 ms 0/2675 (0%)

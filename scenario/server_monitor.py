@@ -29,7 +29,11 @@ def start_tcp_server(
     logging.info(f"TCP iPerf Server Port: {port}")
     print("========================================================")
 
-    with open(output_file, 'w') as out_file:
+    with open(output_file, 'a') as out_file: # append rather than overwrite
+        out_file.write("\n========================================================\n")
+        out_file.write(f"New TCP Server Session Started at: "
+                       f"{subprocess.check_output('date').decode().strip()}\n")
+        out_file.write("========================================================\n")
         process = subprocess.Popen(
             cmd,
             stdout=out_file,
@@ -54,7 +58,11 @@ def start_udp_server(
     logging.info(f"UDP iPerf Server Port: {port}")
     print("========================================================")
 
-    with open(output_file, 'w') as out_file:
+    with open(output_file, 'a') as out_file: # append rather than overwrite
+        out_file.write("\n========================================================\n")
+        out_file.write(f"New UDP Server Session Started at: "
+                       f"{subprocess.check_output('date').decode().strip()}\n")
+        out_file.write("========================================================\n")
         process = subprocess.Popen(
             cmd,
             stdout=out_file,
