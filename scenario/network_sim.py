@@ -3,6 +3,10 @@ import logging
 import sys
 import os
 
+"""
+Network Helpers for Main
+Should be used in main.py, running on UERANSIM machine
+"""
 
 def ensure_dir(file_path):
     directory = os.path.dirname(file_path)
@@ -65,14 +69,15 @@ def ping_test(
 def iperf_tcp_test(
     server_ip: str,
     interface_ip: str,
+    port: int = 5201,
     output_file: str = "./test/iperf_tcp.txt",
     corenet_name: str = "",
     duration: int = 120,
     interval: int = 5,
 ) -> bool:
     """
-    Server: iperf -s -B 10.42.0.1
-    Client: iperf -c 10.42.0.1 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_tcp.txt 2>&1
+    Server: iperf -s -p 5201
+    Client: iperf -c [SERVER_IP] -p 5201 -t 120 -i 5 --bind [UESIMTUN0_IP] > ./test/iperf_tcp.txt 2>&1
 
     Args:
         server_ip: Server IP address (free5gc VM, for test)
@@ -91,6 +96,7 @@ def iperf_tcp_test(
         "sudo",
         "iperf",
         "-c", server_ip,
+        "-p", str(port),
         "-t", str(duration),
         "-i", str(interval),
         "--bind", interface_ip,
@@ -125,14 +131,15 @@ def iperf_tcp_test(
 def iperf_udp_test(
     server_ip: str,
     interface_ip: str,
+    port: int = 5001,
     output_file: str = "./test/iperf_udp.txt",
     corenet_name: str = "",
     duration: int = 120,
     interval: int = 5,
 ) -> bool:
     """
-    Server: iperf -s -B 10.42.0.1
-    Client: iperf -u -c 10.42.0.1 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_udp.txt 2>&1
+    Server: iperf -u -s -p 5001
+    Client: iperf -u -c [SERVER_IP] -p 5001 -t 120 -i 5 --bind [UESIMTUN0_IP] > ./test/iperf_udp.txt 2>&1
 
     Args:
         server_ip: Server IP address (free5gc VM, for test)
@@ -152,6 +159,7 @@ def iperf_udp_test(
         "iperf",
         "-u", 
         "-c", server_ip,
+        "-p", str(port),
         "-t", str(duration),
         "-i", str(interval),
         "--bind", interface_ip,
