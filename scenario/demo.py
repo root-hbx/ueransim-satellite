@@ -12,6 +12,12 @@ Demo for Meeting: Take Open5GS-2 as an example
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 
+FREE5GC_IP = "172.16.162.135"
+OPEN5GS1_IP = "10.45.0.1"
+OPEN5GS2_IP = "10.42.0.1"
+UERSIMTUN1_IP = "10.45.0.2"
+UERSIMTUN2_IP = "10.42.0.2"
+
 def admin():
     """
     Check for sudo at first
@@ -104,7 +110,7 @@ def run_scenario():
 
     # ping -I uesimtun0 172.16.162.135 via open5gs2
     ping_test(
-        target_ip="172.16.162.135",
+        target_ip=FREE5GC_IP,
         interface="uesimtun0",
         count=10,
         output_file="./test/ping_open5gs2.txt",
@@ -113,24 +119,26 @@ def run_scenario():
 
     # TODO(bxhu): Start to Observe Traffic Performance (TCP/UDP Probe)
     """
-    - Server: iperf -s -B 10.42.0.1
-    - Client: iperf -u -c 10.42.0.1 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_tcp.txt 2>&1
+    - Server: iperf -s -p 5201 -B 172.16.162.135
+    - Client: iperf -c 172.16.162.135 -p 5201 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_tcp.txt 2>&1
     """
     iperf_tcp_test(
-        server_ip="10.42.0.1",
-        interface_ip="10.42.0.2",
+        server_ip=FREE5GC_IP,
+        interface_ip=UERSIMTUN2_IP,
+        port=5201,
         output_file="./test/iperf_tcp_open5gs2.txt",
         corenet_name="open5gs2",
         duration=120,
         interval=5
     )
     """
-    - Server: iperf -s -B 10.42.0.1
-    - Client: iperf -u -c 10.42.0.1 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_udp.txt 2>&1
+    - Server: iperf -u -s -p 5001 -B 172.16.162.135
+    - Client: iperf -u -c 172.16.162.135 -p 5001 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_udp.txt 2>&1
     """
     iperf_udp_test(
-        server_ip="10.42.0.1",
-        interface_ip="10.42.0.2",
+        server_ip=FREE5GC_IP,
+        interface_ip=UERSIMTUN2_IP,
+        port=5001,
         output_file="./test/iperf_udp_open5gs2.txt",
         corenet_name="open5gs2",
         duration=120,
