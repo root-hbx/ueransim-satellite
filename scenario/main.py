@@ -4,7 +4,7 @@ import time
 import sys
 import logging
 import threading
-from network_sim import ping_test, iperf_tcp_test, iperf_udp_test
+from network_sim import iperf_udp_test
 
 """
 This script should be run on UERANSIM machine
@@ -188,7 +188,7 @@ def run_scenario():
     print("UDP Test Scenario Completed")
     print("========================================")
     logging.info("Theoretical Time: 65 seconds")
-    logging.info(f"Actual Time: {time.time() - 5 - scenario_start:.2f} seconds")
+    logging.info(f"Actual Time: {time.time() - 5 - scenario_start:.4f} seconds")
     logging.info("Now you need to check the test result in ./test/test_bgd_udp.txt")
     logging.info("Scenario completed successfully")
 
