@@ -126,7 +126,7 @@ def run_udp_background_traffic(
 def run_scenario():
     """Constructing the scenario with time-controlled connections"""
     print("========================================")
-    print("UDP Test Scenario")
+    print("===         UDP Test Scenario        ===")
     print("========================================")
 
     gnb1_process = None
@@ -137,19 +137,19 @@ def run_scenario():
 
     # Record start time for logging as timestamp 0
     logging.info("[t=0] Connecting to open5gs-1...")
+    logging.info("[t=0] Starting UDP background traffic (70s duration)...")
     scenario_start = time.time()
 
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
-    
-    logging.info("[t=5] Starting UDP background traffic (70s duration)...")
+
     udp_thread = run_udp_background_traffic(
         server_ip=FREE5GC_IP,
         interface_ip=UERSIMTUN1_IP,
         port=5001,
         output_file="./test/test_bgd_udp.txt",
         corenet_name="corenet-switching",
-        duration=70,  # From t=5 to t=75
+        duration=70,  # From t=0 to t=70
         interval=5
     )
 
@@ -172,12 +172,12 @@ def run_scenario():
     gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
     ue2_process = start_ue("config/open5gs2-ue.yaml")
 
-    # Wait until t=75 before disconnecting from open5gs-2
+    # Wait until t=70 before disconnecting from open5gs-2
     elapsed = time.time() - scenario_start
-    if elapsed < 75:
-        time.sleep(75 - elapsed)
+    if elapsed < 70:
+        time.sleep(70 - elapsed)
 
-    logging.info("[t=75] Disconnecting from open5gs-2...")
+    logging.info("[t=70] Disconnecting from open5gs-2...")
     terminate_processes(gnb2_process, ue2_process)
 
     # Wait for the UDP thread to finish if it's still running
@@ -187,8 +187,9 @@ def run_scenario():
     print("========================================")
     print("UDP Test Scenario Completed")
     print("========================================")
-    logging.info("Theoretical Time: 70 seconds")
+    logging.info("Theoretical Time: 65 seconds")
     logging.info(f"Actual Time: {time.time() - 5 - scenario_start:.2f} seconds")
+    logging.info("Now you need to check the test result in ./test/test_bgd_udp.txt")
     logging.info("Scenario completed successfully")
 
 
