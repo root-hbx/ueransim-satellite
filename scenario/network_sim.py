@@ -139,8 +139,8 @@ def iperf_udp_test(
     port: int = 5001,
     output_file: str = "./test/iperf_udp.txt",
     corenet_name: str = "",
-    duration: int = 120,
-    interval: int = 5,
+    duration: float = 120,
+    interval: float = 5,
     bandwidth: str = "1M", # "1K" | "1M" | "1G"
 ) -> bool:
     """
@@ -179,7 +179,7 @@ def iperf_udp_test(
 
     try:
         # Use subprocess.run to execute the command and redirect output
-        with open(output_file, 'w') as out_file:
+        with open(output_file, 'a') as out_file: # attach rather than overwrite
             process = subprocess.run(
                 iperf_cmd,
                 stdout=out_file,
