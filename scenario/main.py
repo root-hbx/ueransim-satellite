@@ -3,6 +3,7 @@ import subprocess
 import time
 import sys
 import logging
+import threading
 from network_sim import ping_test, iperf_tcp_test, iperf_udp_test
 
 """
@@ -66,7 +67,7 @@ def terminate_processes(
 def start_gnb(
     config_file: str) -> subprocess.Popen:
     """Start gNB with the given configuration file"""
-    logging.info("(1) Starting gNB...")
+    logging.info("Starting gNB...")
     gnb_cmd = [
         os.path.join(ROOT_DIR, "build/nr-gnb"),
         "-c",
@@ -80,7 +81,7 @@ def start_gnb(
 def start_ue(
     config_file: str) -> subprocess.Popen:
     """Start UE with the given configuration file"""
-    logging.info("(2) Starting UE...")
+    logging.info("Starting UE...")
     ue_cmd = [
         "sudo",
         os.path.join(ROOT_DIR, "build/nr-ue"),
@@ -92,115 +93,103 @@ def start_ue(
     return ue_process
 
 
+def run_udp_background_traffic(
+    server_ip: str,
+    interface_ip: str,
+    port: int = 5001,
+    output_file: str = "./test/iperf_udp.txt",
+    corenet_name: str = "",
+    duration: int = 120,
+    interval: int = 5,
+):
+    """Run UDP background traffic in a separate thread"""
+    def run_traffic():
+        iperf_udp_test(
+            server_ip=server_ip,
+            interface_ip=interface_ip,
+            port=port,
+            output_file=output_file,
+            corenet_name=corenet_name,
+            duration=duration,
+            interval=5
+        )
+
+    thread = threading.Thread(target=run_traffic)
+    thread.daemon = True  # Set as daemon
+
+    logging.info("UDP background traffic started")
+    thread.start()
+
+    return thread
+
+
 def run_scenario():
-    """Constructing the scenario with gNB and UE"""
-    print("Scenario Creating...")
-    print("=======================================================")
-    print("== Phase 1: Traffic through CoreNet 1 (10.45.0.0/16) ==")
-    print("=======================================================")
+    """Constructing the scenario with time-controlled connections"""
+    print("========================================")
+    print("UDP Test Scenario")
+    print("========================================")
 
     gnb1_process = None
     ue1_process = None
-
-    gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
-    time.sleep(3) # Wait for gNB to complete
-    ue1_process = start_ue("config/open5gs1-ue.yaml")
-    time.sleep(3) # Wait for UE to complete
-
-    # ping -I uesimtun0 172.16.162.135 via open5gs1
-    ping_test(
-        target_ip=FREE5GC_IP,
-        interface="uesimtun0",
-        count=10,
-        output_file="./test/ping_open5gs1.txt",
-        corenet_name="open5gs1"
-    )
-
-    # TODO(bxhu): Start to Observe Traffic Performance (TCP/UDP Probe)
-    """
-    - Server: iperf -s -p 5201 -B 172.16.162.135
-    - Client: iperf -c 172.16.162.135 -p 5201 -t 120 -i 5 --bind 10.45.0.2 > ./test/iperf_tcp.txt 2>&1
-    """
-    iperf_tcp_test(
-        server_ip=FREE5GC_IP,
-        interface_ip=UERSIMTUN1_IP,
-        port=5201,
-        output_file="./test/iperf_tcp_open5gs1.txt",
-        corenet_name="open5gs1",
-        duration=120,
-        interval=5
-    )
-    """
-    - Server: iperf -u -s -p 5001 -B 172.16.162.135
-    - Client: iperf -u -c 172.16.162.135 -p 5001 -t 120 -i 5 --bind 10.45.0.2 > ./test/iperf_udp.txt 2>&1
-    """
-    iperf_udp_test(
-        server_ip=FREE5GC_IP,
-        interface_ip=UERSIMTUN1_IP,
-        port=5001,
-        output_file="./test/iperf_udp_open5gs1.txt",
-        corenet_name="open5gs1",
-        duration=120,
-        interval=5
-    )
-
-    terminate_processes(gnb1_process, ue1_process)
-
-    print("==========================================================")
-    print("== Waiting for 5 seconds before starting the next phase ==")
-    print("==========================================================")
-    time.sleep(5)
-
-    print("=======================================================")
-    print("== Phase 2: Traffic through CoreNet 2 (10.42.0.0/16) ==")
-    print("=======================================================")
-
     gnb2_process = None
     ue2_process = None
+    udp_thread = None
 
-    gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
-    time.sleep(3) # Wait for gNB to complete
-    ue2_process = start_ue("config/open5gs2-ue.yaml")
-    time.sleep(3) # Wait for UE to complete
+    # Record start time for logging as timestamp 0
+    logging.info("[t=0] Connecting to open5gs-1...")
+    scenario_start = time.time()
 
-    # ping -I uesimtun0 172.16.162.135 via open5gs2
-    ping_test(
-        target_ip=FREE5GC_IP,
-        interface="uesimtun0",
-        count=10,
-        output_file="./test/ping_open5gs2.txt",
-        corenet_name="open5gs2"
-    )
-
-    # TODO(bxhu): Start to Observe Traffic Performance (TCP/UDP Probe)
-    """
-    - Server: iperf -s -p 5201 -B 172.16.162.135
-    - Client: iperf -c 172.16.162.135 -p 5201 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_tcp.txt 2>&1
-    """
-    iperf_tcp_test(
+    gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
+    ue1_process = start_ue("config/open5gs1-ue.yaml")
+    
+    logging.info("[t=5] Starting UDP background traffic (70s duration)...")
+    udp_thread = run_udp_background_traffic(
         server_ip=FREE5GC_IP,
-        interface_ip=UERSIMTUN2_IP,
-        port=5201,
-        output_file="./test/iperf_tcp_open5gs2.txt",
-        corenet_name="open5gs2",
-        duration=120,
-        interval=5
-    )
-    """
-    - Server: iperf -u -s -p 5001 -B 172.16.162.135
-    - Client: iperf -u -c 172.16.162.135 -p 5001 -t 120 -i 5 --bind 10.42.0.2 > ./test/iperf_udp.txt 2>&1
-    """
-    iperf_udp_test(
-        server_ip=FREE5GC_IP,
-        interface_ip=UERSIMTUN2_IP,
+        interface_ip=UERSIMTUN1_IP,
         port=5001,
-        output_file="./test/iperf_udp_open5gs2.txt",
-        corenet_name="open5gs2",
-        duration=120,
+        output_file="./test/test_bgd_udp.txt",
+        corenet_name="corenet-switching",
+        duration=70,  # From t=5 to t=75
         interval=5
     )
 
+    # Wait until t=35 before disconnecting from open5gs-1
+    elapsed = time.time() - scenario_start
+    if elapsed < 35:
+        time.sleep(35 - elapsed)
+    
+    logging.info("[t=35] Disconnecting from open5gs-1...")
+    terminate_processes(gnb1_process, ue1_process)
+    gnb1_process = None
+    ue1_process = None
+
+    # Wait until t=40 before connecting to open5gs-2
+    elapsed = time.time() - scenario_start
+    if elapsed < 40:
+        time.sleep(40 - elapsed)
+
+    logging.info("[t=40] Connecting to open5gs-2...")
+    gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
+    ue2_process = start_ue("config/open5gs2-ue.yaml")
+
+    # Wait until t=75 before disconnecting from open5gs-2
+    elapsed = time.time() - scenario_start
+    if elapsed < 75:
+        time.sleep(75 - elapsed)
+
+    logging.info("[t=75] Disconnecting from open5gs-2...")
     terminate_processes(gnb2_process, ue2_process)
+
+    # Wait for the UDP thread to finish if it's still running
+    if udp_thread and udp_thread.is_alive():
+        udp_thread.join(timeout=5)
+
+    print("========================================")
+    print("UDP Test Scenario Completed")
+    print("========================================")
+    logging.info("Theoretical Time: 70 seconds")
+    logging.info(f"Actual Time: {time.time() - 5 - scenario_start:.2f} seconds")
+    logging.info("Scenario completed successfully")
 
 
 if __name__ == "__main__":
