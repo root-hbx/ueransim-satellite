@@ -133,56 +133,88 @@ def run_scenario():
     ue1_process = None
     gnb2_process = None
     ue2_process = None
-    udp_thread = None
+    udp1_thread = None
+    udp2_thread = None
 
     # Record start time for logging as timestamp 0
     logging.info("[t=0] Connecting to open5gs-1...")
-    logging.info("[t=0] Starting UDP background traffic (70s duration)...")
+    logging.info("[t=0] Starting UDP background traffic (35s duration)...")
+    
+    # ==========================================================
+    # Time to Start as t=0
     scenario_start = time.time()
-
+    # ==========================================================
+    
+    # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
-
-    udp_thread = run_udp_background_traffic(
+    # Start UDP background traffic
+    udp1_thread = run_udp_background_traffic(
         server_ip=FREE5GC_IP,
         interface_ip=UERSIMTUN1_IP,
         port=5001,
-        output_file="./test/test_bgd_udp.txt",
+        output_file="./test/bgd_udp_stage1.txt",
         corenet_name="corenet-switching",
-        duration=70,  # From t=0 to t=70
+        duration=35,  # From t=0 to t=35
         interval=5
     )
 
+    # ==========================================================
     # Wait until t=35 before disconnecting from open5gs-1
     elapsed = time.time() - scenario_start
     if elapsed < 35:
         time.sleep(35 - elapsed)
-    
+    # ==========================================================
+
     logging.info("[t=35] Disconnecting from open5gs-1...")
+    # Terminate gNB and UE processes
     terminate_processes(gnb1_process, ue1_process)
+    # Wait for the UDP thread to finish if it's still running
+    if udp1_thread and udp1_thread.is_alive():
+        udp1_thread.join(timeout=5)
+    # Clear uesimtun0 open5gs-1 Network Interface
     gnb1_process = None
     ue1_process = None
 
+    # ==========================================================
     # Wait until t=40 before connecting to open5gs-2
     elapsed = time.time() - scenario_start
     if elapsed < 40:
         time.sleep(40 - elapsed)
+    # ==========================================================
 
     logging.info("[t=40] Connecting to open5gs-2...")
+    logging.info("[t=40] Starting UDP background traffic (30s duration)...")
+    # Start gNB and UE for open5gs-2
     gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
     ue2_process = start_ue("config/open5gs2-ue.yaml")
+    # Start UDP background traffic
+    udp2_thread = run_udp_background_traffic(
+        server_ip=FREE5GC_IP,
+        interface_ip=UERSIMTUN2_IP,
+        port=5001,
+        output_file="./test/bgd_udp_stage2.txt",
+        corenet_name="corenet-switching",
+        duration=30,  # From t=40 to t=70
+        interval=5
+    )
 
+    # ==========================================================
     # Wait until t=70 before disconnecting from open5gs-2
     elapsed = time.time() - scenario_start
     if elapsed < 70:
         time.sleep(70 - elapsed)
+    # ==========================================================
 
     logging.info("[t=70] Disconnecting from open5gs-2...")
+    # Terminate gNB and UE processes
     terminate_processes(gnb2_process, ue2_process)
-
     # Wait for the UDP thread to finish if it's still running
-    if udp_thread and udp_thread.is_alive():
-        udp_thread.join(timeout=5)
+    if udp2_thread and udp2_thread.is_alive():
+        udp2_thread.join(timeout=5)
+    # Clear uesimtun1 open5gs-2 Network Interface
+    gnb2_process = None
+    ue2_process = None
 
     print("========================================")
     print("UDP Test Scenario Completed")

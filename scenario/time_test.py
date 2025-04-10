@@ -24,8 +24,12 @@ def run_scenario():
     print("========================================")
 
     # Record start time for logging as timestamp 0
+    print("--------------------------------------------")
     logging.info("[t=0] Connecting to open5gs-1...")
+    print("--------------------------------------------")
+    print("--------------------------------------------")
     logging.info("[t=0] Starting UDP background traffic (70s duration)...")
+    print("--------------------------------------------")
     scenario_start = time.time()
     
     elapsed = time.time() - scenario_start
@@ -36,7 +40,9 @@ def run_scenario():
     if elapsed < 35:
         time.sleep(35 - elapsed)
     
+    print("--------------------------------------------")
     logging.info("[t=35] Disconnecting from open5gs-1...")
+    print("--------------------------------------------")
     
     elapsed = time.time() - scenario_start
     print(elapsed)
@@ -46,7 +52,9 @@ def run_scenario():
     if elapsed < 40:
         time.sleep(40 - elapsed)
 
+    print("--------------------------------------------")
     logging.info("[t=40] Connecting to open5gs-2...")
+    print("--------------------------------------------")
     
     elapsed = time.time() - scenario_start
     print(elapsed)
@@ -56,7 +64,9 @@ def run_scenario():
     if elapsed < 70:
         time.sleep(70 - elapsed)
 
+    print("--------------------------------------------")
     logging.info("[t=70] Disconnecting from open5gs-2...")
+    print("--------------------------------------------")
     
     elapsed = time.time() - scenario_start
     print(elapsed)
