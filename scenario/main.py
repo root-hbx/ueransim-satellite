@@ -34,9 +34,9 @@ def admin():
     """
     Check for sudo at first
     """
-    print("==========================================================")
-    print("== Authentication: Checking for sudo Permission==")
-    print("==========================================================")
+    print("=====================================================")
+    print("== Authentication: Checking for sudo Permission ==")
+    print("=====================================================")
 
     try:
         result = subprocess.run(
@@ -162,7 +162,7 @@ def run_continuous_background_traffic(
                 port=port, 
                 output_file=output_file,
                 corenet_name="open5gs-2",
-                duration=remain_time,
+                duration=total_duration - switch_time, #TODO(bxhu) ? remain_time
                 interval=interval,
                 bandwidth=bandwidth,
             )
@@ -255,8 +255,8 @@ def run_scenario():
     gnb2_process = None
     ue2_process = None
 
-    with open(output_file, "a") as f:
-        f.write(f"Actual Total Time: {time.perf_counter() - scenario_start:.4f} seconds\n")
+    # with open(output_file, "a") as f:
+    #     f.write(f"Actual Total Time: {time.perf_counter() - scenario_start:.4f} seconds\n")
 
     logging.info("Theoretical Time: 70 seconds")
     logging.info(f"Results saved to {output_file}")
@@ -265,8 +265,8 @@ def run_scenario():
 
 if __name__ == "__main__":
     admin()
-    # for bw in ["1M", "10M", "20M", "30M", "40M", "50M", "60M", "70M", "80M"]:
-    for bw in ["1M"]:
+    for bw in ["1M", "10M", "20M", "30M", "40M", "50M", "60M", "70M", "80M"]:
+    # for bw in ["1M"]:
         try:
             BW4UDP = bw
             print(f"\n\n===============================================")
