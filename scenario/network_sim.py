@@ -76,6 +76,7 @@ def iperf_tcp_test(
     corenet_name: str = "",
     duration: int = 120,
     interval: int = 5,
+    bandwidth: str = "1M", # "1K" | "1M" | "1G"
 ) -> bool:
     """
     Server: iperf -s -p 5201
@@ -93,6 +94,7 @@ def iperf_tcp_test(
 
     logging.info(f"iperf Test (TCP): Connecting to {server_ip} "
                 f"via {corenet_name if corenet_name else interface_ip}...")
+    logging.info(f"iperf Test (TCP): Bandwidth {bandwidth}")
     ensure_dir(output_file)
     iperf_cmd = [
         "sudo",
@@ -101,6 +103,7 @@ def iperf_tcp_test(
         "-p", str(port),
         "-t", str(duration),
         "-i", str(interval),
+        "-b", bandwidth,
         "--bind", interface_ip,
     ]
 
@@ -138,6 +141,7 @@ def iperf_udp_test(
     corenet_name: str = "",
     duration: int = 120,
     interval: int = 5,
+    bandwidth: str = "1M", # "1K" | "1M" | "1G"
 ) -> bool:
     """
     Server: iperf -u -s -p 5001
@@ -155,6 +159,7 @@ def iperf_udp_test(
 
     logging.info(f"iperf Test (UDP): Connecting to {server_ip} "
                 f"via {corenet_name if corenet_name else interface_ip}...")
+    logging.info(f"iperf Test (UDP): Bandwidth {bandwidth}")
     ensure_dir(output_file)
     iperf_cmd = [
         "sudo",
@@ -164,6 +169,7 @@ def iperf_udp_test(
         "-p", str(port),
         "-t", str(duration),
         "-i", str(interval),
+        "-b", bandwidth,
         "--bind", interface_ip,
     ]
 
