@@ -139,7 +139,7 @@ def run_scenario():
 
     # Record start time for logging as timestamp 0
     logging.info("[t=0] Connecting to open5gs-1...")
-    logging.info("[t=0] Starting UDP background traffic (65s duration)...")
+    logging.info("[t=0] Starting UDP background traffic (70s duration)...")
     
     # ==========================================================
     # Time to Start as t=0
@@ -156,19 +156,20 @@ def run_scenario():
         port=5001,
         output_file=output_file,
         corenet_name="open5gs-1",
-        duration=65,  # From t=0 to t=65
+        duration=70,  # From t=0 to t=70
         interval=5,
         bandwidth=BW4UDP
     )
 
     # ==========================================================
-    # Wait until t=65 before disconnecting from open5gs-1
+    # Wait until t=70 before disconnecting from open5gs-1
+    logging.info("[t=70] Disconnecting from open5gs-1...")
+    
     elapsed = time.time() - scenario_start
-    if elapsed < 65:
-        time.sleep(65 - elapsed)
+    if elapsed < 70:
+        time.sleep(70 - elapsed)
     # ==========================================================
 
-    logging.info("[t=65] Disconnecting from open5gs-1...")
     # Terminate gNB and UE processes
     terminate_processes(gnb1_process, ue1_process)
     # Wait for the UDP thread to finish if it's still running
@@ -181,7 +182,7 @@ def run_scenario():
     print("========================================")
     print("UDP Test Scenario Completed")
     print("========================================")
-    logging.info("Theoretical Time: 65 seconds")
+    logging.info("Theoretical Time: 70 seconds")
     logging.info(f"Actual Time: {time.time() - scenario_start:.4f} seconds")
     logging.info("Now you need to check the test result in ./std/std_bgd_udp.txt")
     logging.info("Scenario completed successfully")

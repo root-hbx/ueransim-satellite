@@ -132,10 +132,6 @@ def run_scenario():
     global BW4UDP  # string form
     output_file_1 = f"./test/test_bgd_udp_stage1_{BW4UDP}.txt"
     output_file_2 = f"./test/test_bgd_udp_stage2_{BW4UDP}.txt"
-    
-    print("========================================")
-    print("===         UDP Test Scenario        ===")
-    print("========================================")
 
     gnb1_process = None
     ue1_process = None
@@ -145,8 +141,8 @@ def run_scenario():
     udp2_thread = None
 
     # Record start time for logging as timestamp 0
-    logging.info("[t=0] Connecting to open5gs-1...")
-    logging.info("[t=0] Starting UDP background traffic (35s duration)...")
+    print("[t=0] Connecting to open5gs-1...")
+    print("[t=0] Starting UDP background traffic (35s duration)...")
     
     # ==========================================================
     # Time to Start as t=0
@@ -173,7 +169,7 @@ def run_scenario():
     elapsed = time.perf_counter() - scenario_start
     if elapsed < 35:
         time.sleep(35 - elapsed)
-        
+
     # Wait for the UDP thread to finish if it's still running
     if udp1_thread and udp1_thread.is_alive():
         udp1_thread.join(timeout=5)
@@ -181,18 +177,13 @@ def run_scenario():
     terminate_processes(gnb1_process, ue1_process)
     # ==========================================================
 
-    logging.info("[t=35] Disconnecting from open5gs-1...")
+    print("[t=35] Disconnecting from open5gs-1...")
+    print("[t=35] Connecting to open5gs-2...")
+    print("[t=35] Starting UDP background traffic (30s duration)...")
     # Clear uesimtun0 open5gs-1 Network Interface
     gnb1_process = None
     ue1_process = None
 
-    # ==========================================================
-    logging.info("[t=40] Connecting to open5gs-2...")
-    logging.info("[t=40] Starting UDP background traffic (30s duration)...")
-    # Wait until t=40 before connecting to open5gs-2
-    elapsed = time.perf_counter() - scenario_start
-    if elapsed < 40:
-        time.sleep(40 - elapsed)
     # ==========================================================
     # Start gNB and UE for open5gs-2
     gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
@@ -204,13 +195,13 @@ def run_scenario():
         port=5001,
         output_file=output_file_2,
         corenet_name="open5gs-2",
-        duration=30,  # From t=40 to t=70
+        duration=35,  # From t=25 to t=70
         interval=5,
         bandwidth=BW4UDP
     )
 
     # ==========================================================
-    logging.info("[t=70] Disconnecting from open5gs-2...")
+    print("[t=70] Disconnecting from open5gs-2...")
     # Wait until t=70 before disconnecting from open5gs-2
     elapsed = time.perf_counter() - scenario_start
     if elapsed < 70:
@@ -225,19 +216,17 @@ def run_scenario():
     gnb2_process = None
     ue2_process = None
 
-    print("========================================")
-    print("UDP Test Scenario Completed")
-    print("========================================")
-    logging.info("Theoretical Time: 65 seconds")
-    logging.info(f"Actual Time: {time.perf_counter() - 5 - scenario_start:.4f} seconds")
+    with open(output_file_2, "a") as f:
+        f.write(f"Actual Total Time: {time.perf_counter() - scenario_start:.4f} seconds")
+
+    logging.info("Theoretical Time: 70 seconds")
     logging.info("Now you need to check the test result in ./test/test_bgd_udp.txt")
     logging.info("Scenario completed successfully")
 
 
 if __name__ == "__main__":
     admin()
-    # for bw in ["30M", "40M", "50M", "60M", "70M", "80M"]:
-    for bw in ["80M"]:
+    for bw in ["1M", "10M", "20M", "30M", "40M", "50M", "60M", "70M", "80M"]:
         try:
             BW4UDP = bw
             print(f"\n\n===============================================")
