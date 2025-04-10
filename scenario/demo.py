@@ -12,7 +12,7 @@ Demo for Meeting: Take Open5GS-2 as an example
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 
-FREE5GC_IP = "172.16.162.135"
+FREE5GC_IP = "192.168.1.104"
 OPEN5GS1_IP = "10.45.0.1"
 OPEN5GS2_IP = "10.42.0.1"
 UERSIMTUN1_IP = "10.45.0.2"
