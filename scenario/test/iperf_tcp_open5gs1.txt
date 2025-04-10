@@ -1,0 +1,33 @@
+bind failed: Cannot assign requested address
+------------------------------------------------------------
+Client connecting to 192.168.1.104, TCP port 5201
+Binding to local address 10.45.0.2
+TCP window size:  544 KByte (default)
+------------------------------------------------------------
+[  3] local 172.16.162.134 port 33114 connected with 192.168.1.104 port 5201
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0- 5.0 sec  9.00 MBytes  15.1 Mbits/sec
+[  3]  5.0-10.0 sec  9.25 MBytes  15.5 Mbits/sec
+[  3] 10.0-15.0 sec  13.9 MBytes  23.3 Mbits/sec
+[  3] 15.0-20.0 sec  14.2 MBytes  23.9 Mbits/sec
+[  3] 20.0-25.0 sec  17.9 MBytes  30.0 Mbits/sec
+[  3] 25.0-30.0 sec  18.4 MBytes  30.8 Mbits/sec
+[  3] 30.0-35.0 sec  26.4 MBytes  44.2 Mbits/sec
+[  3] 35.0-40.0 sec  23.4 MBytes  39.2 Mbits/sec
+[  3] 40.0-45.0 sec  16.9 MBytes  28.3 Mbits/sec
+[  3] 45.0-50.0 sec  15.9 MBytes  26.6 Mbits/sec
+[  3] 50.0-55.0 sec  7.88 MBytes  13.2 Mbits/sec
+[  3] 55.0-60.0 sec  14.5 MBytes  24.3 Mbits/sec
+[  3] 60.0-65.0 sec  16.4 MBytes  27.5 Mbits/sec
+[  3] 65.0-70.0 sec  20.5 MBytes  34.4 Mbits/sec
+[  3] 70.0-75.0 sec  19.5 MBytes  32.7 Mbits/sec
+[  3] 75.0-80.0 sec  21.2 MBytes  35.7 Mbits/sec
+[  3] 80.0-85.0 sec  13.8 MBytes  23.1 Mbits/sec
+[  3] 85.0-90.0 sec  12.8 MBytes  21.4 Mbits/sec
+[  3] 90.0-95.0 sec  14.6 MBytes  24.5 Mbits/sec
+[  3] 95.0-100.0 sec  11.8 MBytes  19.7 Mbits/sec
+[  3] 100.0-105.0 sec  18.5 MBytes  31.0 Mbits/sec
+[  3] 105.0-110.0 sec  15.6 MBytes  26.2 Mbits/sec
+[  3] 110.0-115.0 sec  13.9 MBytes  23.3 Mbits/sec
+[  3] 115.0-120.0 sec  14.4 MBytes  24.1 Mbits/sec
+[  3]  0.0-120.0 sec   380 MBytes  26.6 Mbits/sec

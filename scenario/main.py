@@ -123,7 +123,7 @@ def run_scenario():
     """
     iperf_tcp_test(
         server_ip=FREE5GC_IP,
-        interface=UERSIMTUN1_IP,
+        interface_ip=UERSIMTUN1_IP,
         port=5201,
         output_file="./test/iperf_tcp_open5gs1.txt",
         corenet_name="open5gs1",
@@ -136,7 +136,7 @@ def run_scenario():
     """
     iperf_udp_test(
         server_ip=FREE5GC_IP,
-        interface=UERSIMTUN1_IP,
+        interface_ip=UERSIMTUN1_IP,
         port=5001,
         output_file="./test/iperf_udp_open5gs1.txt",
         corenet_name="open5gs1",
