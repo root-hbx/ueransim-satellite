@@ -265,8 +265,15 @@ def run_scenario():
 
 if __name__ == "__main__":
     admin()
-    for bw in ["1M", "10M", "20M", "30M", "40M", "50M", "60M", "70M", "80M"]:
-    # for bw in ["1M"]:
+    
+    # Default
+    BW4UDP = "1M"
+    run_scenario()
+    time.sleep(3)
+    
+    # Different bandwidth
+    for i in range(10, 210, 10):
+        bw = f"{i}M"
         try:
             BW4UDP = bw
             print(f"\n\n===============================================")
