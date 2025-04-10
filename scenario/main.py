@@ -150,7 +150,7 @@ def run_scenario():
     
     # ==========================================================
     # Time to Start as t=0
-    scenario_start = time.time()
+    scenario_start = time.perf_counter()
     # ==========================================================
     
     # Start gNB and UE for open5gs-1
@@ -170,7 +170,7 @@ def run_scenario():
 
     # ==========================================================
     # Wait until t=35 before disconnecting from open5gs-1
-    elapsed = time.time() - scenario_start
+    elapsed = time.perf_counter() - scenario_start
     if elapsed < 35:
         time.sleep(35 - elapsed)
         
@@ -190,7 +190,7 @@ def run_scenario():
     logging.info("[t=40] Connecting to open5gs-2...")
     logging.info("[t=40] Starting UDP background traffic (30s duration)...")
     # Wait until t=40 before connecting to open5gs-2
-    elapsed = time.time() - scenario_start
+    elapsed = time.perf_counter() - scenario_start
     if elapsed < 40:
         time.sleep(40 - elapsed)
     # ==========================================================
@@ -212,7 +212,7 @@ def run_scenario():
     # ==========================================================
     logging.info("[t=70] Disconnecting from open5gs-2...")
     # Wait until t=70 before disconnecting from open5gs-2
-    elapsed = time.time() - scenario_start
+    elapsed = time.perf_counter() - scenario_start
     if elapsed < 70:
         time.sleep(70 - elapsed)
     # ==========================================================
@@ -229,14 +229,15 @@ def run_scenario():
     print("UDP Test Scenario Completed")
     print("========================================")
     logging.info("Theoretical Time: 65 seconds")
-    logging.info(f"Actual Time: {time.time() - 5 - scenario_start:.4f} seconds")
+    logging.info(f"Actual Time: {time.perf_counter() - 5 - scenario_start:.4f} seconds")
     logging.info("Now you need to check the test result in ./test/test_bgd_udp.txt")
     logging.info("Scenario completed successfully")
 
 
 if __name__ == "__main__":
     admin()
-    for bw in ["30M", "40M", "50M", "60M", "70M", "80M"]:
+    # for bw in ["30M", "40M", "50M", "60M", "70M", "80M"]:
+    for bw in ["80M"]:
         try:
             BW4UDP = bw
             print(f"\n\n===============================================")
