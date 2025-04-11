@@ -18,10 +18,26 @@ def ensure_dir(file_path):
         os.makedirs(directory)
 
 
+def wait_for_uesimtun0_ip(max_attempts=10, delay=1):
+    """Wait until uesimtun0 interface is ready and has an IP address"""
+    logging.info("Waiting for uesimtun0 interface to be ready...")
+    
+    for attempt in range(max_attempts):
+        try:
+            ip = get_uesimtun0_ip()
+            if ip:
+                logging.info(f"uesimtun0 interface is ready with IP: {ip}")
+                return ip
+        except Exception as e:
+            logging.debug(f"Attempt {attempt+1}/{max_attempts}: uesimtun0 not ready yet ({str(e)})")
+        
+        time.sleep(delay)
+
+    raise ValueError(f"Failed to get uesimtun0 IP after {max_attempts} attempts")
+
+
 def get_uesimtun0_ip():
-    """
-    Get IP of uesimtun0 Network Interface
-    """
+    """Get IP of uesimtun0 Network Interface"""
     try:
         result = subprocess.run(
             ["ifconfig", "uesimtun0"],
@@ -43,27 +59,27 @@ def get_uesimtun0_ip():
         return None
 
 
-def auto_fetch_uesimtun0_ip(func):
-    # func: iperf_udp_test
-    @functools.wraps(func) # functools: preserve metadata of the original function
-    def wrapper(*args, **kwargs):
-        # args: arbitrary positional arguments
-        # kwargs: arbitrary keyword arguments
-        assert 'interface_ip' not in kwargs or kwargs['interface_ip'] is None, \
-            "interface_ip cannot be specified because auto-fetch"
+# def auto_fetch_uesimtun0_ip(func):
+#     # func: iperf_udp_test
+#     @functools.wraps(func) # functools: preserve metadata of the original function
+#     def wrapper(*args, **kwargs):
+#         # args: arbitrary positional arguments
+#         # kwargs: arbitrary keyword arguments
+#         assert 'interface_ip' not in kwargs or kwargs['interface_ip'] is None, \
+#             "interface_ip cannot be specified because auto-fetch"
 
-        ip = get_uesimtun0_ip()
-        if ip:
-            logging.info(f"Auto-fetch uesimtun0 IP: {ip}")
-            kwargs['interface_ip'] = ip
-        else:
-            raise ValueError("Cannot auto-fetch uesimtun0 IP, plz specify interface_ip")
-        return func(*args, **kwargs)
+#         ip = get_uesimtun0_ip()
+#         if ip:
+#             logging.info(f"Auto-fetch uesimtun0 IP: {ip}")
+#             kwargs['interface_ip'] = ip
+#         else:
+#             raise ValueError("Cannot auto-fetch uesimtun0 IP, plz specify interface_ip")
+#         return func(*args, **kwargs)
 
-    return wrapper
+#     return wrapper
 
 
-@auto_fetch_uesimtun0_ip
+# @auto_fetch_uesimtun0_ip
 def iperf_udp_test(
     server_ip: str,
     interface_ip: str = None,
