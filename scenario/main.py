@@ -139,7 +139,7 @@ def run_scenario():
     # Stage1 Actual Duaration
     stage1_time = time.perf_counter() - scenario_start
     with open(output_file, "a") as f:
-        f.write(f"UDP Traffic Starts from {interface1_ip}")
+        f.write(f"UDP Traffic Starts from {interface1_ip}\n")
         f.write(f"[Phase 1] Lasting for {stage1_time}s\n")
 
 
@@ -154,7 +154,7 @@ def run_scenario():
     
     elapsed = time.perf_counter() - scenario_start
     with open(output_file, "a") as f:
-        f.write("Actual Duration For Phase 1: {elapsed:.4f}s\n")
+        f.write(f"Actual Duration For Phase 1: {elapsed:.4f}s\n")
     # ==========================================================
 
     # ==========================================================
@@ -183,7 +183,7 @@ def run_scenario():
     elapsed = time.perf_counter() - scenario_start
 
     with open(output_file, "a") as f:
-        f.write(f"UDP Traffic Switching UDP traffic to {interface2_ip}")
+        f.write(f"UDP Traffic Switching UDP traffic to {interface2_ip}\n")
         f.write(f"[Phase 2] Lasting for {stage2_time}s\n")
         f.write(f"[Total Time] {elapsed:.4f}s\n")
 
@@ -197,7 +197,7 @@ def run_scenario():
 
     elapsed = time.perf_counter() - scenario_start
     with open(output_file, "a") as f:
-        f.write("Actual Total Time: {elapsed:.4f}s\n")
+        f.write(f"Actual Total Time: {elapsed:.4f}s\n")
 
     logging.info("Theoretical Time: 70 seconds")
     logging.info(f"Results saved to {output_file}")
