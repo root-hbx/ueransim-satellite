@@ -208,7 +208,8 @@ def run_scenario():
     total_time = elapsed_sysclose
     t_autoclose_actualclose_udp1 = stage1_time - (35 + built1_probe - scenario_start)
     t_autoclose_actualclose_udp2 = stage2_time - (35 + built2_probe - stage2_probe)
-    t_roaming_cost = total_time - 35 - 35 - t_autoclose_actualclose_udp1 - t_autoclose_actualclose_udp2
+    t_all_cost = total_time - 35 - 35 - t_autoclose_actualclose_udp1 - t_autoclose_actualclose_udp2
+    t_roaming_cost = t_all_cost - (built1_probe - scenario_start) - (elapsed_sysclose - elapsed_actual_udp_close)
 
     with open(output_file, "a") as f:
         f.write("\n")
@@ -216,6 +217,7 @@ def run_scenario():
         f.write(f"total_time = {total_time:.4f}\n")
         f.write(f"t_autoclose_actualclose_udp1 = {(t_autoclose_actualclose_udp1):.4f}\n")
         f.write(f"t_autoclose_actualclose_udp2 = {(t_autoclose_actualclose_udp2):.4f}\n")
+        f.write(f"t_all_cost = {t_all_cost:.4f}\n")
         f.write(f"t_roaming_cost = {t_roaming_cost:.4f}\n")
 
 
@@ -227,13 +229,13 @@ if __name__ == "__main__":
     run_scenario()
     time.sleep(3)
     
-    # Different bandwidth
-    for i in range(10, 210, 10):
-        bw = f"{i}M"
-        try:
-            BW4UDP = bw
-            run_scenario()
-        except Exception as e:
-            logging.error(f"Error during test with bandwidth {bw}: {e}")
-        finally:
-            time.sleep(3)
+    # # Different bandwidth
+    # for i in range(10, 210, 10):
+    #     bw = f"{i}M"
+    #     try:
+    #         BW4UDP = bw
+    #         run_scenario()
+    #     except Exception as e:
+    #         logging.error(f"Error during test with bandwidth {bw}: {e}")
+    #     finally:
+    #         time.sleep(3)
