@@ -11,8 +11,8 @@ for filename in os.listdir('../test'):
 
         with open(filepath, 'r') as file:
             content = file.read()
-            
-            udp_rate_match = re.search(r'(\d+\.\d+) Mbits/sec', content)
+
+            udp_rate_match = re.search(r'(\d+(?:\.\d+)?)\s*Mbits/sec', content)
             if udp_rate_match:
                 udp_rate = float(udp_rate_match.group(1))
                 udp_rates.append(udp_rate)
@@ -28,9 +28,17 @@ if len(udp_rates) != len(roaming_costs):
     print("Roaming costs:", roaming_costs)
 else:
     plt.figure(figsize=(10, 6))
-    plt.scatter(udp_rates, roaming_costs)
+    data_points = list(zip(udp_rates, roaming_costs))
+    data_points.sort(key=lambda x: x[0])
+
+    sorted_rates, sorted_costs = zip(*data_points)
+
+    plt.scatter(sorted_rates, sorted_costs)
+
+    plt.plot(sorted_rates, sorted_costs, '-', color='blue', alpha=0.7)
     plt.xlabel('UDP Bandwidth (Mbps)')
     plt.ylabel('t_roaming_cost (s)')
     plt.title('UDP Bandwidth vs. Roaming Cost')
     plt.grid(True)
-    plt.show()
+    # plt.show()
+    plt.savefig('../image/iperf_udp_point.png', dpi=300) # create image/ manually
