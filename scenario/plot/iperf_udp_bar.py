@@ -1,6 +1,7 @@
 import os
 import re
 import matplotlib.pyplot as plt
+import numpy as np
 
 udp_rates = []
 all_costs = []
@@ -22,7 +23,7 @@ for filename in os.listdir('../test'):
             if all_cost_match:
                 all_cost = float(all_cost_match.group(1))
                 all_costs.append(all_cost)
-                
+
             roaming_cost_match = re.search(r't_roaming_cost = (\d+\.\d+)', content)
             if roaming_cost_match:
                 roaming_cost = float(roaming_cost_match.group(1))
@@ -34,25 +35,27 @@ if len(udp_rates) != len(all_costs) or len(udp_rates) != len(roaming_costs) or l
     print("All costs:", all_costs)
     print("Roaming costs:", roaming_costs)
 else:
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 7))
 
     sorted_data = sorted(zip(udp_rates, all_costs, roaming_costs))
     sorted_udp_rates = [x[0] for x in sorted_data]
     sorted_all_costs = [x[1] for x in sorted_data]
     sorted_roaming_costs = [x[2] for x in sorted_data]
 
-    # scatter for single point
-    plt.scatter(sorted_udp_rates, sorted_all_costs, color='red')
-    plt.scatter(sorted_udp_rates, sorted_roaming_costs, color='green')
+    x = np.arange(len(sorted_udp_rates))
+    width = 0.35  # 条形图宽度
 
-    # plot for line
-    plt.plot(sorted_udp_rates, sorted_all_costs, color='red', linestyle='-', linewidth=1.5, label='t_all_cost (plot)')
-    plt.plot(sorted_udp_rates, sorted_roaming_costs, color='green', linestyle='-', linewidth=1.5, label='t_roaming_cost (plot)')
-
+    plt.bar(x - width/2, sorted_all_costs, width, color='deepskyblue', label='t_all_cost')
+    plt.bar(x + width/2, sorted_roaming_costs, width, color='orange', label='t_roaming_cost')
+    
+    plt.xticks(x, [f"{rate}" for rate in sorted_udp_rates], rotation=45 if len(sorted_udp_rates) > 8 else 0)
+    
     plt.xlabel('UDP Bandwidth (Mbps)')
     plt.ylabel('Time Cost (s)')
     plt.title('UDP Bandwidth vs. Time Cost')
-    plt.grid(True)
-    plt.legend() # show legend
+    plt.grid(True, axis='y', linestyle='--', alpha=0.7)
+    plt.legend()
+    plt.tight_layout()
+    
     # plt.show()
-    plt.savefig('../image/iperf_udp_point.png', dpi=300) # create image/ manually
+    plt.savefig('../image/iperf_udp_bar.png', dpi=300)
