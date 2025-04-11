@@ -3,6 +3,7 @@ import re
 import matplotlib.pyplot as plt
 
 udp_rates = []
+all_costs = []
 roaming_costs = []
 
 for filename in os.listdir('../test'):
@@ -17,28 +18,29 @@ for filename in os.listdir('../test'):
                 udp_rate = float(udp_rate_match.group(1))
                 udp_rates.append(udp_rate)
 
-            roaming_cost_match = re.search(r't_roaming_cost = (\d+\.\d+)', content)
+            all_cost_match = re.search(r't_all_cost = (\d+\.\d+)', content)
+            if all_cost_match:
+                all_cost = float(all_cost_match.group(1))
+                all_costs.append(all_cost)
+                
+            roaming_cost_match = re.match(r't_roaming_cost = (\d+\.\d+)', content)
             if roaming_cost_match:
                 roaming_cost = float(roaming_cost_match.group(1))
                 roaming_costs.append(roaming_cost)
 
-if len(udp_rates) != len(roaming_costs):
-    print("Mismatch between UDP rates and roaming costs.")
+if len(udp_rates) != len(all_costs) or len(udp_rates) != len(roaming_costs) or len(all_costs) != len(roaming_costs):
+    print("Mismatch between UDP rates and all costs.")
     print("UDP rates:", udp_rates)
+    print("All costs:", all_costs)
     print("Roaming costs:", roaming_costs)
 else:
     plt.figure(figsize=(10, 6))
-    data_points = list(zip(udp_rates, roaming_costs))
-    data_points.sort(key=lambda x: x[0])
+    plt.scatter(udp_rates, all_costs, color='red', label='t_all_cost')
+    plt.scatter(udp_rates, roaming_costs, color='green', label='t_roaming_cost')
 
-    sorted_rates, sorted_costs = zip(*data_points)
-
-    plt.scatter(sorted_rates, sorted_costs)
-
-    plt.plot(sorted_rates, sorted_costs, '-', color='blue', alpha=0.7)
     plt.xlabel('UDP Bandwidth (Mbps)')
-    plt.ylabel('t_roaming_cost (s)')
-    plt.title('UDP Bandwidth vs. Roaming Cost')
+    plt.ylabel('Time Cost (s)')
+    plt.title('UDP Bandwidth vs. Time Cost')
     plt.grid(True)
     # plt.show()
     plt.savefig('../image/iperf_udp_point.png', dpi=300) # create image/ manually

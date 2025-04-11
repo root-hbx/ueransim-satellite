@@ -229,13 +229,13 @@ if __name__ == "__main__":
     run_scenario()
     time.sleep(3)
     
-    # # Different bandwidth
-    # for i in range(10, 210, 10):
-    #     bw = f"{i}M"
-    #     try:
-    #         BW4UDP = bw
-    #         run_scenario()
-    #     except Exception as e:
-    #         logging.error(f"Error during test with bandwidth {bw}: {e}")
-    #     finally:
-    #         time.sleep(3)
+    # Different bandwidth
+    for i in range(10, 210, 10):
+        bw = f"{i}M"
+        try:
+            BW4UDP = bw
+            run_scenario()
+        except Exception as e:
+            logging.error(f"Error during test with bandwidth {bw}: {e}")
+        finally:
+            time.sleep(3)
