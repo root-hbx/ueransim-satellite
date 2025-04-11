@@ -51,7 +51,7 @@ def start_udp_server(
     iperf -u -s -p 5001 > ./test/iperf_udp_server.txt
     """
     ensure_dir(output_file)
-    cmd = ["iperf", "-s", "-u", "-p", str(port)]
+    cmd = ["iperf", "-s", "-u", "-p", str(port), "-V"]
 
     print("========================================================")
     logging.info(f"UDP iPerf Server Start Monitoring: {output_file}")
