@@ -5,6 +5,7 @@ import os
 import re
 import time
 import functools
+from typing import Tuple
 
 """
 Network Helpers for Main
@@ -19,7 +20,10 @@ def ensure_dir(file_path):
         os.makedirs(directory)
 
 
-def wait_for_uesimtun0_ip(max_attempts=10, delay=1):
+def wait_for_uesimtun0_ip(
+    max_attempts: int = 10,
+    delay: float = 0.1
+) -> Tuple[str, float]:
     """Wait until uesimtun0 interface is ready and has an IP address"""
     logging.info("Waiting for uesimtun0 interface to be ready...")
     
@@ -28,7 +32,7 @@ def wait_for_uesimtun0_ip(max_attempts=10, delay=1):
             ip = get_uesimtun0_ip()
             if ip:
                 logging.info(f"uesimtun0 interface is ready with IP: {ip}")
-                return ip
+                return [ip, time.perf_counter()]
         except Exception as e:
             logging.debug(f"Attempt {attempt+1}/{max_attempts}: uesimtun0 not ready yet ({str(e)})")
         

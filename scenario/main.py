@@ -118,8 +118,8 @@ def run_scenario():
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
-    interface1_ip = wait_for_uesimtun0_ip(max_attempts=10, delay=1)
-    
+    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=10, delay=1)
+
     # Phase 1: Use interface1 for the first part
     iperf_udp_test(
         server_ip=FREE5GC_IP,
@@ -140,6 +140,7 @@ def run_scenario():
     stage1_time = time.perf_counter() - scenario_start
     with open(output_file, "a") as f:
         f.write(f"UDP Traffic Starts from {interface1_ip}\n")
+        f.write(f"Built time for uesimtun0: {(built1_probe - scenario_start):.4f}s\n")
         f.write(f"[Phase 1] Lasting for {stage1_time}s\n")
 
 
@@ -152,9 +153,9 @@ def run_scenario():
     gnb1_process = None
     ue1_process = None
     
-    elapsed = time.perf_counter() - scenario_start
+    elapsed_disconnect_1 = time.perf_counter() - scenario_start
     with open(output_file, "a") as f:
-        f.write(f"Actual Duration For Phase 1: {elapsed:.4f}s\n")
+        f.write(f"Actual Duration For Phase 1: {elapsed_disconnect_1:.4f}s\n")
     # ==========================================================
 
     # ==========================================================
@@ -165,7 +166,7 @@ def run_scenario():
     # Start gNB and UE for open5gs-2
     gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
     ue2_process = start_ue("config/open5gs2-ue.yaml")
-    interface2_ip = wait_for_uesimtun0_ip(max_attempts=10, delay=1)
+    [interface2_ip, built2_probe] = wait_for_uesimtun0_ip(max_attempts=10, delay=1)
 
     # Phase 2: Use interface2 for the second part
     iperf_udp_test(
@@ -180,12 +181,13 @@ def run_scenario():
     )
 
     stage2_time = time.perf_counter() - stage2_probe
-    elapsed = time.perf_counter() - scenario_start
+    elapsed_actual_udp_close = time.perf_counter() - scenario_start
 
     with open(output_file, "a") as f:
         f.write(f"UDP Traffic Switching UDP traffic to {interface2_ip}\n")
+        f.write(f"Built time for uesimtun0: {(built2_probe - stage2_probe):.4f}s\n")
         f.write(f"[Phase 2] Lasting for {stage2_time}s\n")
-        f.write(f"[Total Time] {elapsed:.4f}s\n")
+        f.write(f"[Total Time] {elapsed_actual_udp_close:.4f}s\n")
 
     # ==========================================================
     print("[t=70] Scenario completed. Disconnecting from open5gs-2...")
@@ -195,9 +197,9 @@ def run_scenario():
     gnb2_process = None
     ue2_process = None
 
-    elapsed = time.perf_counter() - scenario_start
+    elapsed_sysclose = time.perf_counter() - scenario_start
     with open(output_file, "a") as f:
-        f.write(f"Actual Total Time: {elapsed:.4f}s\n")
+        f.write(f"Actual Total Time: {elapsed_sysclose:.4f}s\n")
 
     logging.info("Theoretical Time: 70 seconds")
     logging.info(f"Results saved to {output_file}")
