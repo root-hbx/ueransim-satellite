@@ -133,7 +133,6 @@ def iperf_udp_test(
 
 # if __name__ == "__main__":
 #     # For Test
-#     admin()
 #     iperf_udp_test(
 #         server_ip="198.19.249.234",
 #         interface_ip=None,  # auto-fetch uesimtun0 IP
