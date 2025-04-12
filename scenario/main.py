@@ -12,7 +12,7 @@ This script should be run on UERANSIM machine
 
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
-FREE5GC_IP = "192.168.1.104"
+FREE5GC_IP = "172.16.162.135"
 BW4UDP = "1M"
 
 logging.basicConfig(level=logging.INFO)
