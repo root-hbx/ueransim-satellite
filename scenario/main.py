@@ -230,7 +230,7 @@ if __name__ == "__main__":
     time.sleep(3)
     
     # Different bandwidth
-    for i in range(10, 210, 10):
+    for i in range(10, 310, 10):
         bw = f"{i}M"
         try:
             BW4UDP = bw
