@@ -124,7 +124,7 @@ def run_scenario():
     iperf_udp_test(
         server_ip=FREE5GC_IP,
         interface_ip=interface1_ip,
-        port=5201,
+        port=5001,
         output_file=output_file,
         corenet_name="open5gs-1",
         duration=35,
@@ -172,7 +172,7 @@ def run_scenario():
     iperf_udp_test(
         server_ip=FREE5GC_IP,
         interface_ip=interface2_ip,
-        port=5201, 
+        port=5001, 
         output_file=output_file,
         corenet_name="open5gs-2",
         duration=70 - 35, #TODO(bxhu) ? remain_time
