@@ -65,7 +65,7 @@ def get_uesimtun0_ip():
 
 
 # def auto_fetch_uesimtun0_ip(func):
-#     # func: iperf_udp_test
+#     # func: iperf_tcp_test
 #     @functools.wraps(func) # functools: preserve metadata of the original function
 #     def wrapper(*args, **kwargs):
 #         # args: arbitrary positional arguments
@@ -85,19 +85,19 @@ def get_uesimtun0_ip():
 
 
 # @auto_fetch_uesimtun0_ip
-def iperf_udp_test(
+def iperf_tcp_test(
     server_ip: str,
     interface_ip: str = None,
-    port: int = 5001,
-    output_file: str = "./test/iperf_udp.txt",
+    port: int = 5201,
+    output_file: str = "./test/iperf_tcp.txt",
     corenet_name: str = "",
     duration: float = 120,
     interval: float = 5,
     bandwidth: str = "1M", # "1K" | "1M" | "1G"
 ) -> bool:
     """
-    Server: iperf -u -s -p 5001
-    Client: iperf -u -c [SERVER_IP] -p 5001 -t 120 -i 5 --bind [UESIMTUN0_IP] > ./test/iperf_udp.txt 2>&1
+    Server: iperf -s -p 5201
+    Client: iperf -c [SERVER_IP] -p 5201 -t 120 -i 5 --bind [UESIMTUN0_IP] > ./test/iperf_tcp.txt 2>&1
 
     Args:
         server_ip: Server IP address (free5gc VM, for test)
@@ -109,16 +109,15 @@ def iperf_udp_test(
         bool: True if iperf is successful, False otherwise
     """
 
-    logging.info(f"iperf Test (UDP): Connecting to {server_ip} "
+    logging.info(f"iperf Test (TCP): Connecting to {server_ip} "
                 f"via {corenet_name if corenet_name else interface_ip}...")
-    logging.info(f"iperf Test (UDP): Bandwidth {bandwidth}")
-    logging.info(f"iperf Test (UDP): Network Interface is {interface_ip}")
+    logging.info(f"iperf Test (TCP): Bandwidth {bandwidth}")
+    logging.info(f"iperf Test (TCP): Network Interface is {interface_ip}")
 
     ensure_dir(output_file)
     iperf_cmd = [
         "sudo",
         "iperf",
-        "-u", 
         "-c", server_ip,
         "-p", str(port),
         "-t", str(duration),
@@ -128,7 +127,7 @@ def iperf_udp_test(
     ]
 
     print("=========================================================================")
-    print(f"=== iPerf UDP Test: {interface_ip} -> {server_ip} via {corenet_name} ===")
+    print(f"=== iPerf TCP Test: {interface_ip} -> {server_ip} via {corenet_name} ===")
     print("=========================================================================")
 
     try:
@@ -154,11 +153,11 @@ def iperf_udp_test(
 
 # if __name__ == "__main__":
 #     # For Test
-#     iperf_udp_test(
+#     iperf_tcp_test(
 #         server_ip="198.19.249.234",
 #         interface_ip=None,  # auto-fetch uesimtun0 IP
-#         port=5001,
-#         output_file="./test/iperf_udp.txt",
+#         port=5201,
+#         output_file="./test/iperf_tcp.txt",
 #         corenet_name="test-auto-fetch",
 #         duration=30,
 #         interval=5,
