@@ -91,13 +91,13 @@ def iperf_tcp_test(
     port: int = 5201,
     output_file: str = "./test/iperf_tcp.txt",
     corenet_name: str = "",
-    duration: float = 120,
+    totaldata: str = "20G",
     interval: float = 5,
-    bandwidth: str = "1M", # "1K" | "1M" | "1G"
+    bandwidth: str = "1G", # "1K" | "1M" | "1G"
 ) -> bool:
     """
     Server: iperf -s -p 5201
-    Client: iperf -c [SERVER_IP] -p 5201 -t 120 -i 5 --bind [UESIMTUN0_IP] > ./test/iperf_tcp.txt 2>&1
+    Client: iperf -c [SERVER_IP] -p 5201 -n 20G -i 5 --bind [UESIMTUN0_IP] > ./test/iperf_tcp.txt 2>&1
 
     Args:
         server_ip: Server IP address (free5gc VM, for test)
@@ -120,9 +120,9 @@ def iperf_tcp_test(
         "iperf",
         "-c", server_ip,
         "-p", str(port),
-        "-t", str(duration),
-        "-i", str(interval),
+        "-n", totaldata,
         "-b", bandwidth,
+        "-i", str(interval),
         "--bind", interface_ip,
     ]
 
@@ -159,7 +159,7 @@ def iperf_tcp_test(
 #         port=5201,
 #         output_file="./test/iperf_tcp.txt",
 #         corenet_name="test-auto-fetch",
-#         duration=30,
+#         totaldata="20G",
 #         interval=5,
-#         bandwidth="1M",
+#         bandwidth="1G",
 #     )
