@@ -26,7 +26,7 @@ for filename in os.listdir('../test'):
         with open(filepath, 'r') as file:
             content = file.read()
 
-            total_data_match = re.search(r'Total Data: (\d+\.\d+)', content)
+            total_data_match = re.search(r'Total Data: (\d+)G', content)
             if total_data_match:
                 data = float(total_data_match.group(1))
                 all_datas.append(data)
@@ -54,10 +54,9 @@ for filename in os.listdir('../std'):
                 std_times.append(time)
 
 if len(all_datas) != len(test_times) or len(all_datas) != len(std_times) or len(std_times) != len(test_times):
-    print("Mismatch between UDP rates and all costs.")
-    print("UDP rates:", all_datas)
-    print("All costs:", test_times)
-    print("Roaming costs:", std_times)
+    print("All Data Transferred:", all_datas)
+    print("Divided Link UtiRate", test_times)
+    print("One-Time Link UtiRate:", std_times)
 else:
     process_data()
 
@@ -73,13 +72,13 @@ else:
     plt.scatter(sorted_all_datas, sorted_std_times, color='green')
 
     # plot for line
-    plt.plot(sorted_all_datas, sorted_test_times, color='red', linestyle='-', linewidth=1.5, label='One-Time TCP (plot)')
-    plt.plot(sorted_all_datas, sorted_std_times, color='green', linestyle='-', linewidth=1.5, label='Divided TCP (plot)')
+    plt.plot(sorted_all_datas, sorted_test_times, color='red', linestyle='-', linewidth=1.5, label='Divided TCP (plot)')
+    plt.plot(sorted_all_datas, sorted_std_times, color='green', linestyle='-', linewidth=1.5, label='One-Time TCP (plot)')
 
     plt.xlabel('TCP Transmitted Data (Mbps)')
     plt.ylabel('Link Utilization Rate (s)')
-    plt.title('One-Time TCP vs. Divided TCP')
+    plt.title('One-Time TCP vs. Divided TCP [Original]')
     plt.grid(True)
     plt.legend() # show legend
     # plt.show()
-    plt.savefig('../image/iperf_tcp_point.png', dpi=300) # create image/ manually
+    plt.savefig('../image/iperf_tcp_point_original.png', dpi=300) # create image/ manually
