@@ -97,14 +97,14 @@ def start_ue(
 
 def run_scenario():
     """Constructing the scenario with time-controlled connections"""
-    output_file = f"./test/continuous_tcp_traffic_{TOTAL_DATA}.txt"
+    output_file = f"./std/continuous_tcp_traffic_{TOTAL_DATA}.txt"
     ensure_dir(output_file)
 
     gnb1_process = None
     ue1_process = None
 
     # Record start time for logging as timestamp 0
-    start_exp = time.time()
+    # start_exp = time.time()
     with open(output_file, "a") as f:
         f.write("[t=0] Connecting to open5gs-1...")
         f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}G One-Time ...")
@@ -144,17 +144,17 @@ if __name__ == "__main__":
     admin()
 
     # Default
-    TOTAL_DATA = 500
+    TOTAL_DATA = 10
     run_scenario()
     time.sleep(3)
 
-    # # Total Data
-    # for i in range(50, 310, 10):
-    #     try:
-    #         TOTAL_DATA = i
-    #         run_scenario()
-    #     except Exception as e:
-    #         logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
-    #     finally:
-    #         time.sleep(3)
+    # Total Data
+    for i in range(100, 210, 10):
+        try:
+            TOTAL_DATA = i
+            run_scenario()
+        except Exception as e:
+            logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
+        finally:
+            time.sleep(3)
 

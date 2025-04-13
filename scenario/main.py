@@ -184,17 +184,17 @@ if __name__ == "__main__":
     admin()
 
     # Default
-    TOTAL_DATA = 500
+    TOTAL_DATA = 10
     run_scenario()
     time.sleep(3)
 
-    # # Total Data
-    # for i in range(50, 310, 10):
-    #     try:
-    #         TOTAL_DATA = i
-    #         run_scenario()
-    #     except Exception as e:
-    #         logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
-    #     finally:
-    #         time.sleep(3)
+    # Total Data
+    for i in range(100, 210, 10):
+        try:
+            TOTAL_DATA = i
+            run_scenario()
+        except Exception as e:
+            logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
+        finally:
+            time.sleep(3)
 
