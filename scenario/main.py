@@ -108,7 +108,7 @@ def run_scenario():
     ue2_process = None
 
     # Record start time for logging as timestamp 0
-    start_exp = time.time()
+    start_exp = time.perf_counter()
     with open(output_file, "a") as f:
         f.write("[t=0] Connecting to open5gs-1...")
         f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}G Total, "
@@ -117,7 +117,7 @@ def run_scenario():
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
-    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=0.1)
+    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=1)
 
     # Phase 1: Use interface1 for the first part
     phase_1_total_data = str(DIVIDE_DATA - 0) + "G"
@@ -144,7 +144,7 @@ def run_scenario():
     # Start gNB and UE for open5gs-2
     gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
     ue2_process = start_ue("config/open5gs2-ue.yaml")
-    [interface2_ip, built2_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=0.1)
+    [interface2_ip, built2_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=1)
 
     # Phase 2: Use interface2 for the second part
     phase_2_total_data = str(TOTAL_DATA - DIVIDE_DATA) + "G"
@@ -158,7 +158,7 @@ def run_scenario():
         interval=1,
     )
 
-    tcp_end_time = time.time()
+    tcp_end_time = time.perf_counter()
     tcp_total_time = tcp_end_time - built1_probe
 
     with open(output_file, "a") as f:
@@ -183,15 +183,17 @@ def run_scenario():
 if __name__ == "__main__":
     admin()
 
-    # Default
-    TOTAL_DATA = 10
-    run_scenario()
-    time.sleep(3)
+    # # Default
+    # TOTAL_DATA = 1
+    # DIVIDE_DATA = TOTAL_DATA / 2
+    # run_scenario()
+    # time.sleep(3)
 
     # Total Data
-    for i in range(100, 210, 10):
+    for i in range(1, 11, 1):
         try:
             TOTAL_DATA = i
+            DIVIDE_DATA = TOTAL_DATA / 2
             run_scenario()
         except Exception as e:
             logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
