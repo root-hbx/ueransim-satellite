@@ -55,10 +55,10 @@ def main():
 
     for file_path in files:
         results = extract_data_from_file(file_path)
-        
+
         if len(results) >= 2:
             tcp_rate = results[0]['tcp_rate']  # 假设两个连接的TCP速率相同
-            
+
             # 计算链路利用率: (X + Y) / (a*b + c*d)
             total_transfer = results[0]['transfer'] + results[1]['transfer']
             total_capacity = (results[0]['time_span'] * results[0]['tcp_rate'] + 
