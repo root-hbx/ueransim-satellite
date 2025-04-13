@@ -92,7 +92,7 @@ def iperf_tcp_test(
     output_file: str = "./test/iperf_tcp.txt",
     corenet_name: str = "",
     totaldata: str = "20G",
-    interval: float = 5,
+    interval: float = 1,
     bandwidth: str = "1G", # "1K" | "1M" | "1G"
 ) -> bool:
     """
