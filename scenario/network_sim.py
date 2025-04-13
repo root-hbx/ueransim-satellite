@@ -93,7 +93,6 @@ def iperf_tcp_test(
     corenet_name: str = "",
     totaldata: str = "20G",
     interval: float = 1,
-    bandwidth: str = "1G", # "1K" | "1M" | "1G"
 ) -> bool:
     """
     Server: iperf -s -p 5201
@@ -111,7 +110,6 @@ def iperf_tcp_test(
 
     logging.info(f"iperf Test (TCP): Connecting to {server_ip} "
                 f"via {corenet_name if corenet_name else interface_ip}...")
-    logging.info(f"iperf Test (TCP): Bandwidth {bandwidth}")
     logging.info(f"iperf Test (TCP): Network Interface is {interface_ip}")
 
     ensure_dir(output_file)
@@ -121,7 +119,6 @@ def iperf_tcp_test(
         "-c", server_ip,
         "-p", str(port),
         "-n", totaldata,
-        "-b", bandwidth,
         "-i", str(interval),
         "--bind", interface_ip,
     ]
@@ -161,5 +158,4 @@ def iperf_tcp_test(
 #         corenet_name="test-auto-fetch",
 #         totaldata="20G",
 #         interval=5,
-#         bandwidth="1G",
 #     )

@@ -13,9 +13,8 @@ This script should be run on UERANSIM machine
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 FREE5GC_IP = "172.16.162.135"
-BW4TCP = "1G"
-TOTAL_DATA = 40
-DIVIDE_DATA = 20
+TOTAL_DATA = 500
+DIVIDE_DATA = TOTAL_DATA / 2
 
 logging.basicConfig(level=logging.INFO)
 
@@ -100,8 +99,7 @@ def start_ue(
 
 def run_scenario():
     """Constructing the scenario with time-controlled connections"""
-    global BW4TCP
-    output_file = f"./test/continuous_tcp_traffic_{BW4TCP}.txt"
+    output_file = f"./test/continuous_tcp_traffic_{TOTAL_DATA}.txt"
     ensure_dir(output_file)
 
     gnb1_process = None
@@ -131,7 +129,6 @@ def run_scenario():
         corenet_name="open5gs-1",
         totaldata=phase_1_total_data,
         interval=1,
-        bandwidth=BW4TCP,
     )
 
     # Terminate first gNB and UE processes
@@ -159,8 +156,10 @@ def run_scenario():
         corenet_name="open5gs-2",
         totaldata=phase_2_total_data,
         interval=1,
-        bandwidth=BW4TCP,
     )
+
+    tcp_end_time = time.time()
+    tcp_total_time = tcp_end_time - built1_probe
 
     with open(output_file, "a") as f:
         f.write("\n[Phase 2]\n")
@@ -175,22 +174,25 @@ def run_scenario():
     logging.info(f"Results saved to {output_file}")
     logging.info("Scenario completed successfully")
 
+    with open(output_file, "a") as f:
+        f.write(f"\n[Summary]\n")
+        f.write(f"Total Time: {tcp_total_time:.4f} seconds\n")
+
 
 if __name__ == "__main__":
     admin()
 
     # Default
-    BW4TCP = "1G"
+    TOTAL_DATA = 40
     run_scenario()
     time.sleep(3)
 
-    # # Different bandwidth
-    # for i in range(10, 310, 10):
-    #     bw = f"{i}M"
+    # # Total Data
+    # for i in range(50, 310, 10):
     #     try:
-    #         BW4TCP = bw
+    #         TOTAL_DATA = i
     #         run_scenario()
     #     except Exception as e:
-    #         logging.error(f"Error during test with bandwidth {bw}: {e}")
+    #         logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
     #     finally:
     #         time.sleep(3)
