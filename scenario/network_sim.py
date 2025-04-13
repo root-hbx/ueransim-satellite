@@ -26,7 +26,7 @@ def wait_for_uesimtun0_ip(
 ) -> Tuple[str, float]:
     """Wait until uesimtun0 interface is ready and has an IP address"""
     logging.info("Waiting for uesimtun0 interface to be ready...")
-    
+
     for attempt in range(max_attempts):
         try:
             ip = get_uesimtun0_ip()
