@@ -75,8 +75,8 @@ else:
     plt.plot(sorted_all_datas, sorted_test_times, color='red', linestyle='-', linewidth=1.5, label='Divided TCP (plot)')
     plt.plot(sorted_all_datas, sorted_std_times, color='green', linestyle='-', linewidth=1.5, label='One-Time TCP (plot)')
 
-    plt.xlabel('TCP Transmitted Data (Mbps)')
-    plt.ylabel('Link Utilization Rate (s)')
+    plt.xlabel('TCP Transmitted Data (GB)')
+    plt.ylabel('Link Utilization Rate')
     plt.title('One-Time TCP vs. Divided TCP [Original]')
     plt.grid(True)
     plt.legend() # show legend
