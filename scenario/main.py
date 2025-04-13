@@ -4,13 +4,7 @@ import time
 import sys
 import logging
 import threading
-import signal
-import traceback
-from network_sim import (
-    get_uesimtun0_ip,
-    wait_for_uesimtun0_ip,
-    iperf_tcp_test
-)
+from network_sim import wait_for_uesimtun0_ip ,iperf_tcp_test
 
 """
 This script should be run on UERANSIM machine
@@ -20,6 +14,8 @@ This script should be run on UERANSIM machine
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 FREE5GC_IP = "172.16.162.135"
 BW4TCP = "1G"
+TOTAL_DATA = 40
+DIVIDE_DATA = 20
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,13 +25,6 @@ Flow:
   * 0-35s: Through open5gs-1 (10.45.0.2)
   * 35-70s: Through open5gs-2 (10.42.0.2)
 """
-
-# 全局变量用于控制和共享状态
-current_interface_ip = None
-iperf_process = None
-interface_changed_event = threading.Event()
-stop_monitoring = threading.Event()
-TOTAL_DATA = "40G"  # 总共需要传输的数据量
 
 def admin():
     """
@@ -109,149 +98,77 @@ def start_ue(
     return ue_process
 
 
-def monitor_uesimtun0_interface():
-    """持续监控uesimtun0接口的变化"""
-    global current_interface_ip, iperf_process
-    
-    logging.info("开始监控uesimtun0接口...")
-    
-    while not stop_monitoring.is_set():
-        try:
-            new_ip = get_uesimtun0_ip()
-            
-            if new_ip:
-                # 如果IP发生变化
-                if new_ip != current_interface_ip and current_interface_ip is not None:
-                    logging.info(f"接口IP变化检测: 从 {current_interface_ip} 到 {new_ip}")
-                    current_interface_ip = new_ip
-                    interface_changed_event.set()  # 触发接口变化事件
-                elif current_interface_ip is None:
-                    current_interface_ip = new_ip
-                    logging.info(f"初始接口IP: {current_interface_ip}")
-            else:
-                if current_interface_ip is not None:
-                    logging.info("未检测到接口IP，可能已断开连接")
-                    interface_changed_event.set()  # 触发接口变化事件
-                    current_interface_ip = None
-        except Exception as e:
-            logging.error(f"监控uesimtun0接口时出错: {e}")
-            if current_interface_ip is not None:
-                logging.info("uesimtun0接口可能不存在")
-                current_interface_ip = None
-                interface_changed_event.set()  # 触发接口变化事件
-
-        # 每秒检查一次
-        time.sleep(0.1)
-
-
 def run_scenario():
     """Constructing the scenario with time-controlled connections"""
-    global BW4TCP, current_interface_ip, iperf_process, stop_monitoring
-
+    global BW4TCP
     output_file = f"./test/continuous_tcp_traffic_{BW4TCP}.txt"
 
     gnb1_process = None
     ue1_process = None
     gnb2_process = None
     ue2_process = None
-    
-    try:
-        # Create a daemon thread to monitor the uesimtun0 interface
-        # Real-time monitoring of the uesimtun0 interface (for switching)
-        monitor_thread = threading.Thread(target=monitor_uesimtun0_interface, daemon=True)
-        monitor_thread.start()
 
-        # Start Time of Phase 1
-        start_time = time.time()
+    # Record start time for logging as timestamp 0
+    start_exp = time.time()
+    print("[t=0] Connecting to open5gs-1...")
+    print("[t=0] Starting continuous TCP background traffic (40G Total, 20G Each)...")
 
-        # [Phase 1] Connecting with open5gs-1
-        logging.info("[t=0] Connecting with Open5GS-1...")
-        gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
-        ue1_process = start_ue("config/open5gs1-ue.yaml")
+    # Start gNB and UE for open5gs-1
+    gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
+    ue1_process = start_ue("config/open5gs1-ue.yaml")
+    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=0.1)
 
-        [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=10, delay=1)
-        current_interface_ip = interface1_ip
+    # Phase 1: Use interface1 for the first part
+    phase_1_total_data = str(DIVIDE_DATA - 0) + "G"
+    iperf_tcp_test(
+        server_ip=FREE5GC_IP,
+        interface_ip=interface1_ip,
+        port=5201,
+        output_file=output_file,
+        corenet_name="open5gs-1",
+        totaldata=phase_1_total_data,
+        interval=1,
+        bandwidth=BW4TCP,
+    )
 
-        # TCP Traffic Gen (One-Time, 40G)
-        logging.info(f"[t={built1_probe - start_time}] TCP Traffic Generation ({interface1_ip})")
-        with open(output_file, "a") as f:
-            f.write(f"TCP Traffic Total Data: {TOTAL_DATA}\n")
-            f.write(f"[t={built1_probe - start_time}] TCP Traffic Generation ({interface1_ip})")
+    # Terminate first gNB and UE processes
+    terminate_processes(gnb1_process, ue1_process)
+    gnb1_process = None
+    ue1_process = None
 
-        # Create TCP BGD Traffic, as a new thread
-        iperf_thread = threading.Thread(
-            target=iperf_tcp_test,
-            args=(FREE5GC_IP, interface1_ip),
-            kwargs={
-                "port": 5201,
-                "output_file": output_file,
-                "corenet_name": "open5gs-1 & open5gs-2",
-                "totaldata": TOTAL_DATA,  # 总共40G
-                "interval": 1,
-                "bandwidth": BW4TCP
-            },
-            daemon=True
-        )
-        iperf_thread.start()
+    with open(output_file, "a") as f:
+        f.write(f"[t = {built1_probe - start_exp}] TCP Traffic Switching TCP traffic from {interface1_ip}\n")
+        f.write(f"[Phase 1] Data Transferred: {phase_1_total_data}\n")
 
-        # Maintain the connection for 25 seconds
-        logging.info("Connecting with Open5GS-1 for 25 seconds...")
-        time.sleep(25)
+    # Start gNB and UE for open5gs-2
+    gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
+    ue2_process = start_ue("config/open5gs2-ue.yaml")
+    [interface2_ip, built2_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=0.1)
 
-        # End of Phase 1
-        logging.info("Terminating the Connection with Open5GS-1...")
-        terminate_processes(gnb1_process, ue1_process)
-        gnb1_process = None
-        ue1_process = None
+    # Phase 2: Use interface2 for the second part
+    phase_2_total_data = str(TOTAL_DATA - DIVIDE_DATA) + "G"
+    iperf_tcp_test(
+        server_ip=FREE5GC_IP,
+        interface_ip=interface2_ip,
+        port=5201,
+        output_file=output_file,
+        corenet_name="open5gs-2",
+        totaldata=phase_2_total_data,
+        interval=1,
+        bandwidth=BW4TCP,
+    )
 
-        '''
-        ==========================================================
-        '''
+    with open(output_file, "a") as f:
+        f.write(f"[t = {built2_probe - start_exp}] TCP Traffic Switching TCP traffic from {interface1_ip} to {interface2_ip}\n")
+        f.write(f"[Phase 2] Data Transferred: {phase_2_total_data}\n")
 
-        # Start Time of Phase 2
-        phase2_time = time.time() - start_time
+    # Terminate gNB and UE processes
+    terminate_processes(gnb2_process, ue2_process)
+    gnb2_process = None
+    ue2_process = None
 
-        # [Phase 2] Connecting with open5gs-2
-        logging.info(f"[t = {phase2_time}] Connecting with Open5GS-2...")
-        gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
-        ue2_process = start_ue("config/open5gs2-ue.yaml")
-
-        # Waiting for Interface Switching
-        interface_changed_event.wait(timeout=20)
-        interface_changed_event.clear()
-
-        # Get New Interface IP
-        if current_interface_ip:
-            [interface2_ip, built2_probe] = wait_for_uesimtun0_ip(max_attempts=10, delay=1)
-            assert interface2_ip == current_interface_ip, "Interface IP mismatch"
-
-            with open(output_file, "a") as f:
-                f.write(f"[t={built2_probe - start_time}] TCP Traffic Generation ({interface2_ip})")
-                f.write("TCP Traffic Transmission Continues...\n")
-
-            # 注意：在现有实现中，iperf_tcp_test会在接口不可用时自然终止
-            # 当接口重新可用后，数据传输会继续但可能需要重新启动
-            # 这里我们等待iperf线程完成
-            iperf_thread.join(timeout=60)
-        else:
-            logging.error("Could not fetch the new interface IP...")
-
-    except Exception as e:
-        logging.error(f"Error: {e}")
-        logging.error(traceback.format_exc())
-    finally:
-        stop_monitoring.set()
-        
-        if gnb1_process or ue1_process:
-            logging.info("Terminating the Connection with Open5GS-1...")
-            terminate_processes(gnb1_process, ue1_process)
-
-        if gnb2_process or ue2_process:
-            logging.info("Terminating the Connection with Open5GS-2...")
-            terminate_processes(gnb2_process, ue2_process)
-
-        logging.info(f"Outputs are stored into: {output_file}")
-        logging.info("TCP Scenario completed!")
+    logging.info(f"Results saved to {output_file}")
+    logging.info("Scenario completed successfully")
 
 
 if __name__ == "__main__":
@@ -261,7 +178,7 @@ if __name__ == "__main__":
     BW4TCP = "1G"
     run_scenario()
     time.sleep(3)
-
+    
     # # Different bandwidth
     # for i in range(10, 310, 10):
     #     bw = f"{i}M"

@@ -4,7 +4,7 @@ import time
 import sys
 import logging
 import threading
-from network_sim import iperf_udp_test
+from network_sim import wait_for_uesimtun0_ip ,iperf_tcp_test
 
 """
 This script should be run on UERANSIM machine
@@ -12,22 +12,17 @@ This script should be run on UERANSIM machine
 
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
-
-FREE5GC_IP = "192.168.1.104"
-OPEN5GS1_IP = "10.45.0.1"
-OPEN5GS2_IP = "10.42.0.1"
-UERSIMTUN1_IP = "10.45.0.2"
-UERSIMTUN2_IP = "10.42.0.2"
-
-BW4UDP = "1M"
+FREE5GC_IP = "172.16.162.135"
+BW4TCP = "1G"
+TOTAL_DATA = 40
 
 logging.basicConfig(level=logging.INFO)
 
 """
 Flow:
-- 0-70s: Continuous UDP background traffic flow 
+- 0-70s: Continuous TCP background traffic flow 
   * 0-35s: Through open5gs-1 (10.45.0.2)
-  * 35-70s: Through open5gs-1 (10.45.0.2)
+  * 35-70s: Through open5gs-2 (10.42.0.2)
 """
 
 def admin():
@@ -102,183 +97,65 @@ def start_ue(
     return ue_process
 
 
-def run_continuous_background_traffic(
-    server_ip: str,
-    total_duration: float = 70,
-    bandwidth: str = "1M",
-    output_file: str = "./test/continuous_udp_traffic.txt",
-    interface1_ip: str = UERSIMTUN1_IP,
-    interface2_ip: str = UERSIMTUN2_IP,
-    switch_time: float = 35,
-    port: int = 5001,
-    interval: float = 5
-):
-    """Run continuous UDP background traffic that switches interfaces"""
-    def run_traffic():
-        
-        print(f"=== Continuous UDP Traffic Test (BW={bandwidth}) ===\n")
-        print(f"Total Duration: {total_duration}s with interface switch at {switch_time}s\n")
-        print(f"First interface: {interface1_ip} (0-{switch_time}s)\n")
-        print(f"Second interface: {interface2_ip} ({switch_time}-{total_duration}s)\n\n")
-        
-        # t0
-        stage1_probe = time.perf_counter()
-        
-        # Phase 1: Use interface1 for the first part
-        logging.info(f"UDP Traffic Starts from {interface1_ip}")
-        iperf_udp_test(
-            server_ip=server_ip,
-            interface_ip=interface1_ip,
-            port=port,
-            output_file=output_file,
-            corenet_name="open5gs-1",
-            duration=switch_time,
-            interval=interval,
-            bandwidth=bandwidth,
-        )
-
-        # t0 + switch_time + delta_1
-        # switch_time + delta_1 > switch_time = 35s
-        # hence: udp_2 starts after open5gs2 is connected
-        
-        # Stage1 Actual Duaration
-        stage1_time = time.perf_counter() - stage1_probe
-        with open(output_file, "a") as f:
-            f.write(f"[Phase 1] Lasting for {stage1_time}s\n")
-
-        # t1 = t0 + switch_time + delta_1
-        stage2_probe = time.perf_counter()
-
-        # Phase 2: Use interface2 for the second part
-        remain_time = total_duration - stage1_time
-        if remain_time > 0:
-            logging.info(f"[Phase 2] Switching UDP traffic to {interface2_ip} for {remain_time:.4f}s")
-            with open(output_file, "a") as f:
-                f.write(f"\n=== Interface Switching: {interface1_ip} -> {interface2_ip} ===\n\n")
-
-            iperf_udp_test(
-                server_ip=server_ip,
-                interface_ip=interface2_ip,
-                port=port, 
-                output_file=output_file,
-                corenet_name="open5gs-2",
-                duration=total_duration - switch_time, #TODO(bxhu) ? remain_time
-                interval=interval,
-                bandwidth=bandwidth,
-            )
-
-        stage2_time = time.perf_counter() - stage2_probe
-        with open(output_file, "a") as f:
-            f.write(f"[Phase 2] Lasting for {stage2_time}s\n")
-
-        # Write completion
-        elapsed = time.perf_counter() - stage1_probe
-        with open(output_file, "a") as f:
-            f.write(f"[Total Time] {elapsed:.4f}s\n")
-
-    thread = threading.Thread(target=run_traffic)
-    thread.daemon = True
-    thread.start()
-    
-    return thread
-
-
 def run_scenario():
     """Constructing the scenario with time-controlled connections"""
-    global BW4UDP
-    output_file = f"./std/continuous_udp_traffic_{BW4UDP}.txt"
-    
+    global BW4TCP
+    output_file = f"./std/continuous_tcp_traffic_{BW4TCP}.txt"
+
     gnb1_process = None
     ue1_process = None
-    
+
     # Record start time for logging as timestamp 0
+    start_exp = time.time()
     print("[t=0] Connecting to open5gs-1...")
-    print("[t=0] Starting continuous UDP background traffic (70s total, switching at t=35s)...")
-    
-    # ==========================================================
-    # Time to Start as t=0
-    scenario_start = time.perf_counter()
-    # ==========================================================
-    
+    print(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}G Total, One-Time)...")
+
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
-    
-    # Start continuous UDP background traffic (will reconnect this interface at t=35s)
-    traffic_thread = run_continuous_background_traffic(
+    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=1)
+
+    # Phase 1: Use interface1 for the first part
+    iperf_tcp_test(
         server_ip=FREE5GC_IP,
-        total_duration=70,
-        bandwidth=BW4UDP,
+        interface_ip=interface1_ip,
+        port=5201,
         output_file=output_file,
-        interface1_ip=UERSIMTUN1_IP,
-        interface2_ip=UERSIMTUN1_IP,
-        switch_time=35,
-        port=5001,
-        interval=5
+        corenet_name="open5gs-1",
+        totaldata=str(TOTAL_DATA) + "G",
+        interval=1,
+        bandwidth=BW4TCP,
     )
 
-    # ==========================================================
-    # Wait until t=35 before network switching
-    elapsed = time.perf_counter() - scenario_start
-    if elapsed < 35:
-        time.sleep(35 - elapsed)
-    # ==========================================================
-
-    print("[t=35] Disconnecting from open5gs-1...")
-    print("[t=35] Connecting to open5gs-1 again...")
     # Terminate first gNB and UE processes
     terminate_processes(gnb1_process, ue1_process)
     gnb1_process = None
     ue1_process = None
 
-    # Start gNB and UE for open5gs-2
-    gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
-    ue1_process = start_ue("config/open5gs1-ue.yaml")
+    with open(output_file, "a") as f:
+        f.write("\n[Phase 1]\n")
+        f.write(f"[t = {built1_probe - start_exp}] TCP Traffic Switching TCP traffic from {interface1_ip}\n")
+        f.write(f"[Sender] Data Transferred: {TOTAL_DATA}\n")
 
-    # ==========================================================
-    # Wait until t=70 before disconnecting from open5gs-2
-    elapsed = time.perf_counter() - scenario_start
-    if elapsed < 70:
-        time.sleep(70 - elapsed)
-    # ==========================================================
-    
-    print("[t=70] Scenario completed. Disconnecting from open5gs-1...")
-    # Terminate gNB and UE processes
-    terminate_processes(gnb1_process, ue1_process)
-    
-    # Wait for the traffic thread to finish
-    if traffic_thread and traffic_thread.is_alive():
-        traffic_thread.join(timeout=10)
-    
-    gnb1_process = None
-    ue1_process = None
-
-    # with open(output_file, "a") as f:
-    #     f.write(f"Actual Total Time: {time.perf_counter() - scenario_start:.4f} seconds\n")
-
-    logging.info("Theoretical Time: 70 seconds")
     logging.info(f"Results saved to {output_file}")
     logging.info("Scenario completed successfully")
 
 
 if __name__ == "__main__":
     admin()
-    
+
     # Default
-    BW4UDP = "1M"
+    BW4TCP = "1G"
     run_scenario()
     time.sleep(3)
-    
-    # Different bandwidth
-    for i in range(10, 210, 10):
-        bw = f"{i}M"
-        try:
-            BW4UDP = bw
-            print(f"\n\n===============================================")
-            print(f"Running scenario with bandwidth: {BW4UDP}")
-            print(f"===============================================\n")
-            run_scenario()
-        except Exception as e:
-            logging.error(f"Error during test with bandwidth {bw}: {e}")
-        finally:
-            time.sleep(3)
+
+    # # Different bandwidth
+    # for i in range(10, 310, 10):
+    #     bw = f"{i}M"
+    #     try:
+    #         BW4TCP = bw
+    #         run_scenario()
+    #     except Exception as e:
+    #         logging.error(f"Error during test with bandwidth {bw}: {e}")
+    #     finally:
+    #         time.sleep(3)
