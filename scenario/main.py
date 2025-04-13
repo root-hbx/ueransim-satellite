@@ -175,7 +175,8 @@ def run_scenario():
     logging.info("Scenario completed successfully")
 
     with open(output_file, "a") as f:
-        f.write("\n[Summary]\n")
+        f.write("\nstatistics:\n")
+        f.write(f"Total Data: {TOTAL_DATA}G\n")
         f.write(f"Total Time: {tcp_total_time:.4f} seconds\n")
 
 

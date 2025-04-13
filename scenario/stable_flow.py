@@ -4,7 +4,7 @@ import time
 import sys
 import logging
 import threading
-from network_sim import wait_for_uesimtun0_ip ,iperf_tcp_test
+from network_sim import wait_for_uesimtun0_ip, iperf_tcp_test, ensure_dir
 
 """
 This script should be run on UERANSIM machine
@@ -13,16 +13,14 @@ This script should be run on UERANSIM machine
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 FREE5GC_IP = "172.16.162.135"
-BW4TCP = "1G"
-TOTAL_DATA = 40
+TOTAL_DATA = 500
 
 logging.basicConfig(level=logging.INFO)
 
 """
 Flow:
 - 0-70s: Continuous TCP background traffic flow 
-  * 0-35s: Through open5gs-1 (10.45.0.2)
-  * 35-70s: Through open5gs-2 (10.42.0.2)
+  * 0-70s: Through open5gs-1 (10.45.0.2)
 """
 
 def admin():
@@ -99,33 +97,37 @@ def start_ue(
 
 def run_scenario():
     """Constructing the scenario with time-controlled connections"""
-    global BW4TCP
-    output_file = f"./std/continuous_tcp_traffic_{BW4TCP}.txt"
+    output_file = f"./test/continuous_tcp_traffic_{TOTAL_DATA}.txt"
+    ensure_dir(output_file)
 
     gnb1_process = None
     ue1_process = None
 
     # Record start time for logging as timestamp 0
     start_exp = time.time()
-    print("[t=0] Connecting to open5gs-1...")
-    print(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}G Total, One-Time)...")
+    with open(output_file, "a") as f:
+        f.write("[t=0] Connecting to open5gs-1...")
+        f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}G One-Time ...")
 
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
-    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=1)
+    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=0.1)
 
     # Phase 1: Use interface1 for the first part
+    phase_1_total_data = str(TOTAL_DATA - 0) + "G"
     iperf_tcp_test(
         server_ip=FREE5GC_IP,
         interface_ip=interface1_ip,
         port=5201,
         output_file=output_file,
         corenet_name="open5gs-1",
-        totaldata=str(TOTAL_DATA) + "G",
+        totaldata=phase_1_total_data,
         interval=1,
-        bandwidth=BW4TCP,
     )
+
+    tcp_end_time = time.time()
+    tcp_total_time = tcp_end_time - built1_probe
 
     # Terminate first gNB and UE processes
     terminate_processes(gnb1_process, ue1_process)
@@ -133,29 +135,26 @@ def run_scenario():
     ue1_process = None
 
     with open(output_file, "a") as f:
-        f.write("\n[Phase 1]\n")
-        f.write(f"[t = {built1_probe - start_exp}] TCP Traffic Switching TCP traffic from {interface1_ip}\n")
-        f.write(f"[Sender] Data Transferred: {TOTAL_DATA}\n")
-
-    logging.info(f"Results saved to {output_file}")
-    logging.info("Scenario completed successfully")
+        f.write("\nstatistics:\n")
+        f.write(f"Total Data: {TOTAL_DATA}G\n")
+        f.write(f"Total Time: {tcp_total_time:.4f} seconds\n")
 
 
 if __name__ == "__main__":
     admin()
 
     # Default
-    BW4TCP = "1G"
+    TOTAL_DATA = 500
     run_scenario()
     time.sleep(3)
 
-    # # Different bandwidth
-    # for i in range(10, 310, 10):
-    #     bw = f"{i}M"
+    # # Total Data
+    # for i in range(50, 310, 10):
     #     try:
-    #         BW4TCP = bw
+    #         TOTAL_DATA = i
     #         run_scenario()
     #     except Exception as e:
-    #         logging.error(f"Error during test with bandwidth {bw}: {e}")
+    #         logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
     #     finally:
     #         time.sleep(3)
+
