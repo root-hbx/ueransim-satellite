@@ -104,7 +104,7 @@ def run_scenario():
     ue1_process = None
 
     # Record start time for logging as timestamp 0
-    # start_exp = time.time()
+    # start_exp = time.perf_counter()
     with open(output_file, "a") as f:
         f.write("[t=0] Connecting to open5gs-1...")
         f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}G One-Time ...")
@@ -126,7 +126,7 @@ def run_scenario():
         interval=1,
     )
 
-    tcp_end_time = time.time()
+    tcp_end_time = time.perf_counter()
     tcp_total_time = tcp_end_time - built1_probe
 
     # Terminate first gNB and UE processes
