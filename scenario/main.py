@@ -4,7 +4,7 @@ import time
 import sys
 import logging
 import threading
-from network_sim import wait_for_uesimtun0_ip ,iperf_tcp_test
+from network_sim import wait_for_uesimtun0_ip, iperf_tcp_test, ensure_dir
 
 """
 This script should be run on UERANSIM machine
@@ -102,6 +102,7 @@ def run_scenario():
     """Constructing the scenario with time-controlled connections"""
     global BW4TCP
     output_file = f"./test/continuous_tcp_traffic_{BW4TCP}.txt"
+    ensure_dir(output_file)
 
     gnb1_process = None
     ue1_process = None
@@ -110,8 +111,10 @@ def run_scenario():
 
     # Record start time for logging as timestamp 0
     start_exp = time.time()
-    print("[t=0] Connecting to open5gs-1...")
-    print("[t=0] Starting continuous TCP background traffic (40G Total, 20G Each)...")
+    with open(output_file, "a") as f:
+        f.write("[t=0] Connecting to open5gs-1...")
+        f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}G Total, "
+                f"{DIVIDE_DATA - 0}G for Stage-1), {TOTAL_DATA - DIVIDE_DATA}G for Stage-2...")
 
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
@@ -137,8 +140,9 @@ def run_scenario():
     ue1_process = None
 
     with open(output_file, "a") as f:
-        f.write(f"[t = {built1_probe - start_exp}] TCP Traffic Switching TCP traffic from {interface1_ip}\n")
-        f.write(f"[Phase 1] Data Transferred: {phase_1_total_data}\n")
+        f.write("\n[Phase 1]\n")
+        f.write(f"[t = {built1_probe - start_exp}] TCP Traffic Switching TCP traffic from {interface1_ip}...\n")
+        f.write(f"[Sender] Data Transferred: {phase_1_total_data}\n")
 
     # Start gNB and UE for open5gs-2
     gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
@@ -159,8 +163,9 @@ def run_scenario():
     )
 
     with open(output_file, "a") as f:
-        f.write(f"[t = {built2_probe - start_exp}] TCP Traffic Switching TCP traffic from {interface1_ip} to {interface2_ip}\n")
-        f.write(f"[Phase 2] Data Transferred: {phase_2_total_data}\n")
+        f.write("\n[Phase 2]\n")
+        f.write(f"[t = {built2_probe - start_exp}] TCP Traffic Switching TCP traffic from {interface1_ip} to {interface2_ip}...\n")
+        f.write(f"[Sender] Data Transferred: {phase_2_total_data}\n")
 
     # Terminate gNB and UE processes
     terminate_processes(gnb2_process, ue2_process)
