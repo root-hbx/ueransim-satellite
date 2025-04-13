@@ -175,7 +175,7 @@ def run_scenario():
     logging.info("Scenario completed successfully")
 
     with open(output_file, "a") as f:
-        f.write(f"\n[Summary]\n")
+        f.write("\n[Summary]\n")
         f.write(f"Total Time: {tcp_total_time:.4f} seconds\n")
 
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     admin()
 
     # Default
-    TOTAL_DATA = 40
+    TOTAL_DATA = 500
     run_scenario()
     time.sleep(3)
 
@@ -196,3 +196,4 @@ if __name__ == "__main__":
     #         logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
     #     finally:
     #         time.sleep(3)
+
