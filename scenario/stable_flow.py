@@ -112,7 +112,7 @@ def run_scenario():
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
-    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=1)
+    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
 
     # Phase 1: Use interface1 for the first part
     phase_1_total_data = str(TOTAL_DATA - 0) + "G"
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     # time.sleep(3)
 
     # Total Data
-    for i in range(1, 11, 1):
+    for i in range(5, 31, 1):
         try:
             TOTAL_DATA = i
             run_scenario()

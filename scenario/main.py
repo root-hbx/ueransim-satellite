@@ -117,7 +117,7 @@ def run_scenario():
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
-    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=1)
+    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
 
     # Phase 1: Use interface1 for the first part
     phase_1_total_data = str(DIVIDE_DATA - 0) + "G"
@@ -144,7 +144,7 @@ def run_scenario():
     # Start gNB and UE for open5gs-2
     gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
     ue2_process = start_ue("config/open5gs2-ue.yaml")
-    [interface2_ip, built2_probe] = wait_for_uesimtun0_ip(max_attempts=15, delay=1)
+    [interface2_ip, built2_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
 
     # Phase 2: Use interface2 for the second part
     phase_2_total_data = str(TOTAL_DATA - DIVIDE_DATA) + "G"
