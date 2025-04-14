@@ -14,14 +14,17 @@ This repo is inspired by [UERANSIM](https://github.com/aligungr/UERANSIM/wiki).
 - `master`: stable, the same as original UERANSIM repo
 - `free5gc`: UERANSIM && free5gc, currently maintain the same as original UERANSIM repo
 - `open5gs`: UERANSIM && open5gs, interacting with [opensat: tcp-gen](https://github.com/root-hbx/open5gs-satellite/tree/tcpgen)
-- `mm-switch`: UERANSIM && (open5gs1 -> open5gs2), interacting with [opensat: mm-switch](https://github.com/root-hbx/open5gs-satellite/tree/mm-switch)
+- `mm-switch`: UERANSIM && (open5gs1 -> open5gs2)
+    - interacting with [opensat: mm-switch](https://github.com/root-hbx/open5gs-satellite/tree/mm-switch)
     - for [#issue 5](https://github.com/root-hbx/open5gs-satellite/issues/5)
 - `udp-test`: UERANSIM && (open5gs1 -> open5gs2)
     - iPerf client scripts
+    - interacting with [opensat: tcpgen (open5gs1)](https://github.com/root-hbx/open5gs-satellite/tree/tcpgen) and [opensat: mm-switch (open5gs2)](https://github.com/root-hbx/open5gs-satellite/tree/mm-switch)
     - `ueransim/scenario/main.py`
     - for [#issue 6](https://github.com/root-hbx/open5gs-satellite/issues/6)
 - `tcp-test`: UERANSIM && (open5gs1 -> open5gs2)
     - iPerf client scripts
+    - interacting with [opensat: tcpgen (open5gs1)](https://github.com/root-hbx/open5gs-satellite/tree/tcpgen) and [opensat: mm-switch (open5gs2)](https://github.com/root-hbx/open5gs-satellite/tree/mm-switch)
     - `ueransim/scenario/main.py` and `ueransim/scenario/stable_flow.py`
     - for [#issue 7](https://github.com/root-hbx/open5gs-satellite/issues/7)
 - `iperf-server`: UERANSIM && (open5gs1 -> open5gs2)
