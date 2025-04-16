@@ -4,7 +4,7 @@ import time
 import sys
 import logging
 import threading
-from network_sim import wait_for_uesimtun0_ip ,iperf_udp_test
+from network_sim import wait_for_uesimtun0_ip, iperf_udp_test
 
 """
 This script should be run on UERANSIM machine
@@ -114,7 +114,7 @@ def run_scenario():
     # Time to Start as t0=0
     scenario_start = time.perf_counter()
     # ==========================================================
-    
+
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
@@ -135,7 +135,7 @@ def run_scenario():
     # t0 + switch_time + delta_1
     # switch_time + delta_1 > switch_time = 35s
     # hence: udp_2 starts after open5gs2 is connected
-    
+
     # Stage1 Actual Duaration
     stage1_time = time.perf_counter() - scenario_start
     with open(output_file, "a") as f:
@@ -152,7 +152,7 @@ def run_scenario():
     terminate_processes(gnb1_process, ue1_process)
     gnb1_process = None
     ue1_process = None
-    
+
     elapsed_disconnect_1 = time.perf_counter() - scenario_start
     with open(output_file, "a") as f:
         f.write(f"Actual Duration For Phase 1: {elapsed_disconnect_1:.4f}s\n")
@@ -193,7 +193,7 @@ def run_scenario():
     print("[t=70] Scenario completed. Disconnecting from open5gs-2...")
     # Terminate gNB and UE processes
     terminate_processes(gnb2_process, ue2_process)
-    
+
     gnb2_process = None
     ue2_process = None
 
@@ -204,7 +204,7 @@ def run_scenario():
     logging.info("Theoretical Time: 70 seconds")
     logging.info(f"Results saved to {output_file}")
     logging.info("Scenario completed successfully")
-    
+
     total_time = elapsed_sysclose
     t_autoclose_actualclose_udp1 = stage1_time - (35 + built1_probe - scenario_start)
     t_autoclose_actualclose_udp2 = stage2_time - (35 + built2_probe - stage2_probe)
@@ -223,12 +223,12 @@ def run_scenario():
 
 if __name__ == "__main__":
     admin()
-    
+
     # Default
     BW4UDP = "1M"
     run_scenario()
     time.sleep(3)
-    
+
     # Different bandwidth
     for i in range(10, 310, 10):
         bw = f"{i}M"
