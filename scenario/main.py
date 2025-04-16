@@ -118,6 +118,7 @@ def run_scenario():
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
     [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
+    # TODO(bxhu) sudo systemctl start wondershaper.service
 
     # Phase 1: Use interface1 for the first part
     phase_1_total_data = str(DIVIDE_DATA - 0) + "M"
@@ -132,6 +133,7 @@ def run_scenario():
     )
 
     # Terminate first gNB and UE processes
+    # TODO(bxhu) sudo systemctl stop wondershaper.service
     terminate_processes(gnb1_process, ue1_process)
     gnb1_process = None
     ue1_process = None
@@ -145,6 +147,7 @@ def run_scenario():
     gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
     ue2_process = start_ue("config/open5gs2-ue.yaml")
     [interface2_ip, built2_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
+    # TODO(bxhu) sudo systemctl start wondershaper.service
 
     # Phase 2: Use interface2 for the second part
     phase_2_total_data = str(TOTAL_DATA - DIVIDE_DATA) + "M"
@@ -167,6 +170,7 @@ def run_scenario():
         f.write(f"[Sender] Data Transferred: {phase_2_total_data}\n")
 
     # Terminate gNB and UE processes
+    # TODO(bxhu) sudo systemctl stop wondershaper.service
     terminate_processes(gnb2_process, ue2_process)
     gnb2_process = None
     ue2_process = None
