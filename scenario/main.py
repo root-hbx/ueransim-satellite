@@ -13,7 +13,7 @@ This script should be run on UERANSIM machine
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 FREE5GC_IP = "172.16.162.135"
-TOTAL_DATA = 500
+TOTAL_DATA = 300
 DIVIDE_DATA = TOTAL_DATA / 2
 
 logging.basicConfig(level=logging.INFO)
@@ -111,8 +111,8 @@ def run_scenario():
     start_exp = time.perf_counter()
     with open(output_file, "a") as f:
         f.write("[t=0] Connecting to open5gs-1...")
-        f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}G Total, "
-                f"{DIVIDE_DATA - 0}G for Stage-1), {TOTAL_DATA - DIVIDE_DATA}G for Stage-2...")
+        f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}MB Total, "
+                f"{DIVIDE_DATA - 0}MB for Stage-1), {TOTAL_DATA - DIVIDE_DATA}MB for Stage-2...")
 
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
@@ -120,7 +120,7 @@ def run_scenario():
     [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
 
     # Phase 1: Use interface1 for the first part
-    phase_1_total_data = str(DIVIDE_DATA - 0) + "G"
+    phase_1_total_data = str(DIVIDE_DATA - 0) + "M"
     iperf_tcp_test(
         server_ip=FREE5GC_IP,
         interface_ip=interface1_ip,
@@ -147,7 +147,7 @@ def run_scenario():
     [interface2_ip, built2_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
 
     # Phase 2: Use interface2 for the second part
-    phase_2_total_data = str(TOTAL_DATA - DIVIDE_DATA) + "G"
+    phase_2_total_data = str(TOTAL_DATA - DIVIDE_DATA) + "M"
     iperf_tcp_test(
         server_ip=FREE5GC_IP,
         interface_ip=interface2_ip,
@@ -176,27 +176,27 @@ def run_scenario():
 
     with open(output_file, "a") as f:
         f.write("\nstatistics:\n")
-        f.write(f"Total Data: {TOTAL_DATA}G\n")
+        f.write(f"Total Data: {TOTAL_DATA}MB\n")
         f.write(f"Total Time: {tcp_total_time:.4f} seconds\n")
 
 
 if __name__ == "__main__":
     admin()
 
-    # # Default
-    # TOTAL_DATA = 1
-    # DIVIDE_DATA = TOTAL_DATA / 2
-    # run_scenario()
-    # time.sleep(3)
+    # Default
+    TOTAL_DATA = 300
+    DIVIDE_DATA = TOTAL_DATA / 2
+    run_scenario()
+    time.sleep(3)
 
-    # Total Data
-    for i in range(1, 11, 1):
-        try:
-            TOTAL_DATA = i
-            DIVIDE_DATA = TOTAL_DATA / 2
-            run_scenario()
-        except Exception as e:
-            logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
-        finally:
-            time.sleep(3)
+    # # Total Data
+    # for i in range(1, 11, 1):
+    #     try:
+    #         TOTAL_DATA = i
+    #         DIVIDE_DATA = TOTAL_DATA / 2
+    #         run_scenario()
+    #     except Exception as e:
+    #         logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
+    #     finally:
+    #         time.sleep(3)
 
