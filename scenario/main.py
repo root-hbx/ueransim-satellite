@@ -111,9 +111,9 @@ def run_scenario():
     # Record start time for logging as timestamp 0
     start_exp = time.perf_counter()
     with open(output_file, "a") as f:
-        f.write("[t=0] Connecting to open5gs-1...")
+        f.write("[t=0] Connecting to open5gs-1...\n")
         f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}MB Total, "
-                f"{DIVIDE_DATA - 0}MB for Stage-1), {TOTAL_DATA - DIVIDE_DATA}MB for Stage-2...")
+                f"{DIVIDE_DATA - 0}MB for Stage-1), {TOTAL_DATA - DIVIDE_DATA}MB for Stage-2...\n")
 
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
@@ -121,6 +121,8 @@ def run_scenario():
     [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
     # TODO(bxhu) sudo systemctl start wondershaper.service
     start_wondershaper_service() # must be called after uesimtun0 exists
+
+    service_start_1 = time.perf_counter()
 
     # Phase 1: Use interface1 for the first part
     phase_1_total_data = str(DIVIDE_DATA - 0) + "M"
@@ -134,9 +136,14 @@ def run_scenario():
         interval=1,
     )
 
-    # Terminate first gNB and UE processes
+    tcp_end_1 = time.perf_counter()
+
     # TODO(bxhu) sudo systemctl stop wondershaper.service
     stop_wondershaper_service() # must be called before uesimtun0 is killed
+
+    service_end_1 = time.perf_counter()
+
+    # Terminate first gNB and UE processes
     terminate_processes(gnb1_process, ue1_process)
     gnb1_process = None
     ue1_process = None
@@ -153,6 +160,8 @@ def run_scenario():
     # TODO(bxhu) sudo systemctl start wondershaper.service
     start_wondershaper_service()
 
+    service_start_2 = time.perf_counter()
+
     # Phase 2: Use interface2 for the second part
     phase_2_total_data = str(TOTAL_DATA - DIVIDE_DATA) + "M"
     iperf_tcp_test(
@@ -165,8 +174,7 @@ def run_scenario():
         interval=1,
     )
 
-    tcp_end_time = time.perf_counter()
-    tcp_total_time = tcp_end_time - built1_probe
+    tcp_end_2 = time.perf_counter()
 
     with open(output_file, "a") as f:
         f.write("\n[Phase 2]\n")
@@ -183,10 +191,17 @@ def run_scenario():
     logging.info(f"Results saved to {output_file}")
     logging.info("Scenario completed successfully")
 
+    total_time = tcp_end_2 - service_start_1
+    service_delay_1 = service_end_1 - tcp_end_1
+    service_delay_2 = service_start_2 - built2_probe
+
     with open(output_file, "a") as f:
         f.write("\nstatistics:\n")
-        f.write(f"Total Data: {TOTAL_DATA}MB\n")
-        f.write(f"Total Time: {tcp_total_time:.4f} seconds\n")
+        f.write(f"Total Data: {TOTAL_DATA} MB\n")
+        f.write(f"Total Time: {total_time} seconds\n")
+        f.write(f"Service Delay 1: {service_delay_1} seconds\n")
+        f.write(f"Service Delay 2: {service_delay_2} seconds\n")
+        f.write(f"TCP Runtime: {total_time - service_delay_1 - service_delay_2} seconds\n")
 
 
 if __name__ == "__main__":
