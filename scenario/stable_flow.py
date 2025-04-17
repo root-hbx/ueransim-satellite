@@ -3,7 +3,7 @@ import subprocess
 import time
 import sys
 import logging
-import threading
+from service_helper import start_wondershaper_service, stop_wondershaper_service
 from network_sim import wait_for_uesimtun0_ip, iperf_tcp_test, ensure_dir
 
 """
@@ -13,7 +13,7 @@ This script should be run on UERANSIM machine
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 FREE5GC_IP = "172.16.162.135"
-TOTAL_DATA = 500
+TOTAL_DATA = 300
 
 logging.basicConfig(level=logging.INFO)
 
@@ -107,15 +107,19 @@ def run_scenario():
     # start_exp = time.perf_counter()
     with open(output_file, "a") as f:
         f.write("[t=0] Connecting to open5gs-1...")
-        f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}G One-Time ...")
+        f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_DATA}MB One-Time ...")
 
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
     [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
+    # TODO(bxhu) sudo systemctl start wondershaper.service
+    start_wondershaper_service() # must be called after uesimtun0 exists
+
+    service_start_1 = time.perf_counter()
 
     # Phase 1: Use interface1 for the first part
-    phase_1_total_data = str(TOTAL_DATA - 0) + "G"
+    phase_1_total_data = str(TOTAL_DATA - 0) + "M"
     iperf_tcp_test(
         server_ip=FREE5GC_IP,
         interface_ip=interface1_ip,
@@ -126,8 +130,11 @@ def run_scenario():
         interval=1,
     )
 
-    tcp_end_time = time.perf_counter()
-    tcp_total_time = tcp_end_time - built1_probe
+    tcp_end_1 = time.perf_counter()
+    tcp_total_time = tcp_end_1 - service_start_1
+
+    # TODO(bxhu) sudo systemctl stop wondershaper.service
+    stop_wondershaper_service() # must be called before uesimtun0 is killed
 
     # Terminate first gNB and UE processes
     terminate_processes(gnb1_process, ue1_process)
@@ -135,26 +142,26 @@ def run_scenario():
     ue1_process = None
 
     with open(output_file, "a") as f:
-        f.write("\nstatistics:\n")
-        f.write(f"Total Data: {TOTAL_DATA}G\n")
-        f.write(f"Total Time: {tcp_total_time:.4f} seconds\n")
+        f.write("\nStatistics:\n")
+        f.write(f"Total Data: {TOTAL_DATA} MB\n")
+        f.write(f"TCP Runtime: {tcp_total_time:.4f} seconds\n")
 
 
 if __name__ == "__main__":
     admin()
 
-    # # Default
-    # TOTAL_DATA = 10
-    # run_scenario()
-    # time.sleep(3)
+    # Default
+    TOTAL_DATA = 300
+    run_scenario()
+    time.sleep(3)
 
-    # Total Data
-    for i in range(5, 31, 1):
-        try:
-            TOTAL_DATA = i
-            run_scenario()
-        except Exception as e:
-            logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
-        finally:
-            time.sleep(3)
+    # # Total Data
+    # for i in range(5, 31, 1):
+    #     try:
+    #         TOTAL_DATA = i
+    #         run_scenario()
+    #     except Exception as e:
+    #         logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
+    #     finally:
+    #         time.sleep(3)
 

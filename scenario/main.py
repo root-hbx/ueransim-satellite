@@ -196,7 +196,7 @@ def run_scenario():
     service_delay_2 = service_start_2 - built2_probe
 
     with open(output_file, "a") as f:
-        f.write("\nstatistics:\n")
+        f.write("\nStatistics:\n")
         f.write(f"Total Data: {TOTAL_DATA} MB\n")
         f.write(f"Total Time: {total_time} seconds\n")
         f.write(f"Service Delay 1: {service_delay_1} seconds\n")
