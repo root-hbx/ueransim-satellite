@@ -210,19 +210,19 @@ if __name__ == "__main__":
     # Currently, BW_MAX = 200 Mbps
 
     # Default
-    TOTAL_DATA = 300
+    TOTAL_DATA = 200
     DIVIDE_DATA = TOTAL_DATA / 2
     run_scenario()
     time.sleep(3)
 
-    # Total Data
-    for i in range(200, 500, 100):
-        try:
-            TOTAL_DATA = i
-            DIVIDE_DATA = TOTAL_DATA / 2
-            run_scenario()
-        except Exception as e:
-            logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
-        finally:
-            time.sleep(3)
+    # # Total Data
+    # for i in range(200, 500, 100):
+    #     try:
+    #         TOTAL_DATA = i
+    #         DIVIDE_DATA = TOTAL_DATA / 2
+    #         run_scenario()
+    #     except Exception as e:
+    #         logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
+    #     finally:
+    #         time.sleep(3)
 
