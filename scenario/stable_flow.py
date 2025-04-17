@@ -112,7 +112,7 @@ def run_scenario():
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
     ue1_process = start_ue("config/open5gs1-ue.yaml")
-    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=30, delay=1)
+    [interface1_ip, built1_probe] = wait_for_uesimtun0_ip(max_attempts=300, delay=0.1)
     # TODO(bxhu) sudo systemctl start wondershaper.service
     start_wondershaper_service() # must be called after uesimtun0 exists
 
