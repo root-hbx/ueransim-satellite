@@ -197,11 +197,11 @@ def run_scenario():
 
     with open(output_file, "a") as f:
         f.write("\nStatistics:\n")
-        f.write(f"Total Data: {TOTAL_DATA} MB\n")
-        f.write(f"Total Time: {total_time} seconds\n")
-        f.write(f"Service Delay 1: {service_delay_1} seconds\n")
-        f.write(f"Service Delay 2: {service_delay_2} seconds\n")
-        f.write(f"TCP Runtime: {total_time - service_delay_1 - service_delay_2} seconds\n")
+        f.write(f"Total Data: {TOTAL_DATA:.4f} MB\n")
+        f.write(f"Total Time: {total_time:.4f} seconds\n")
+        f.write(f"Service Delay 1: {service_delay_1:.4f} seconds\n")
+        f.write(f"Service Delay 2: {service_delay_2:.4f} seconds\n")
+        f.write(f"TCP Runtime: {(total_time - service_delay_1 - service_delay_2):.4f} seconds\n")
 
 
 if __name__ == "__main__":
