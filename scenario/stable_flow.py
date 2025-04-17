@@ -13,7 +13,7 @@ This script should be run on UERANSIM machine
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 FREE5GC_IP = "172.16.162.135"
-TOTAL_DATA = 300
+TOTAL_DATA = 100
 
 logging.basicConfig(level=logging.INFO)
 
@@ -152,20 +152,20 @@ if __name__ == "__main__":
 
     # Currently, BW_MAX = 200 Mbps
 
-    # Default
-    TOTAL_DATA = 300
-    DIVIDE_DATA = TOTAL_DATA / 2
-    run_scenario()
-    time.sleep(3)
+    # # Default
+    # TOTAL_DATA = 1000
+    # DIVIDE_DATA = TOTAL_DATA / 2
+    # run_scenario()
+    # time.sleep(3)
 
-    # # Total Data
-    # for i in range(200, 500, 100):
-    #     try:
-    #         TOTAL_DATA = i
-    #         DIVIDE_DATA = TOTAL_DATA / 2
-    #         run_scenario()
-    #     except Exception as e:
-    #         logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
-    #     finally:
-    #         time.sleep(3)
+    # Total Data
+    for i in range(100, 1100, 100):
+        try:
+            TOTAL_DATA = i
+            DIVIDE_DATA = TOTAL_DATA / 2
+            run_scenario()
+        except Exception as e:
+            logging.error(f"Error for Total Data {TOTAL_DATA}: {e}")
+        finally:
+            time.sleep(10)
 
