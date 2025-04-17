@@ -2,18 +2,20 @@ import os
 import re
 import matplotlib.pyplot as plt
 
+BW_MAX = 200 # Mbps
+
 all_datas = []
 test_times = []
 std_times = []
 
 def process_data():
     for i in range(len(test_times)):
-        test_times[i] = test_times[i] * 500 # Mb
+        test_times[i] = test_times[i] * BW_MAX # Mb
         test_times[i] = test_times[i] / 8 # MB
         test_times[i] = test_times[i] / 1024 # GB
         test_times[i] = all_datas[i] / test_times[i] # link utilization rate
     for i in range(len(std_times)):
-        std_times[i] = std_times[i] * 500 # Mb
+        std_times[i] = std_times[i] * BW_MAX # Mb
         std_times[i] = std_times[i] / 8 # MB
         std_times[i] = std_times[i] / 1024 # GB
         std_times[i] = all_datas[i] / std_times[i] # link utilization rate
