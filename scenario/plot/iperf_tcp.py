@@ -12,12 +12,12 @@ def process_data():
     for i in range(len(test_times)):
         test_times[i] = test_times[i] * BW_MAX # Mb
         test_times[i] = test_times[i] / 8 # MB
-        test_times[i] = test_times[i] / 1024 # GB
+        # test_times[i] = test_times[i] / 1024 # GB
         test_times[i] = all_datas[i] / test_times[i] # link utilization rate
     for i in range(len(std_times)):
         std_times[i] = std_times[i] * BW_MAX # Mb
         std_times[i] = std_times[i] / 8 # MB
-        std_times[i] = std_times[i] / 1024 # GB
+        # std_times[i] = std_times[i] / 1024 # GB
         std_times[i] = all_datas[i] / std_times[i] # link utilization rate
 
 
@@ -28,12 +28,12 @@ for filename in os.listdir('../test'):
         with open(filepath, 'r') as file:
             content = file.read()
 
-            total_data_match = re.search(r'Total Data: (\d+)G', content)
+            total_data_match = re.search(r'Total Data: (\d+\.\d+)', content)
             if total_data_match:
                 data = float(total_data_match.group(1))
                 all_datas.append(data)
                 
-            total_time_match = re.search(r'Total Time: (\d+\.\d+)', content)
+            total_time_match = re.search(r'TCP Runtime: (\d+\.\d+)', content)
             if total_time_match:
                 time = float(total_time_match.group(1))
                 test_times.append(time)
@@ -49,8 +49,8 @@ for filename in os.listdir('../std'):
             # if total_data_match:
             #     data = float(total_data_match.group(1))
             #     all_datas.append(data)
-                
-            total_time_match = re.search(r'Total Time: (\d+\.\d+)', content)
+
+            total_time_match = re.search(r'TCP Runtime: (\d+\.\d+)', content)
             if total_time_match:
                 time = float(total_time_match.group(1))
                 std_times.append(time)

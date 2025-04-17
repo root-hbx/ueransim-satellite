@@ -159,7 +159,7 @@ if __name__ == "__main__":
     # time.sleep(3)
 
     # Total Data
-    for i in range(100, 1100, 100):
+    for i in range(1600, 2100, 100):
         try:
             TOTAL_DATA = i
             DIVIDE_DATA = TOTAL_DATA / 2
