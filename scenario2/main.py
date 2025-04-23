@@ -230,14 +230,14 @@ if __name__ == "__main__":
 
     # Currently, BW_MAX = 200 Mbps by WonderShaper
 
-    # Default
-    TOTAL_TIME = 60
-    DIVIDE_TIME = TOTAL_TIME / 2
-    run_scenario()
-    time.sleep(10)
+    # # Default
+    # TOTAL_TIME = 60
+    # DIVIDE_TIME = TOTAL_TIME / 2
+    # run_scenario()
+    # time.sleep(10)
 
     # Total Data
-    for i in range(100, 3100, 100):
+    for i in range(10, 210, 10):
         try:
             TOTAL_TIME = i
             DIVIDE_TIME = TOTAL_TIME / 2
