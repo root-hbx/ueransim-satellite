@@ -109,8 +109,8 @@ def iperf_tcp_test(
     """
 
     logging.info(f"iperf Test (TCP): Connecting to {server_ip} "
-                f"via {corenet_name if corenet_name else interface_ip}...")
-    logging.info(f"iperf Test (TCP): Network Interface is {interface_ip}")
+                f"via {corenet_name if corenet_name else interface_ip}...\n")
+    logging.info(f"iperf Test (TCP): Network Interface is {interface_ip}.\n")
 
     ensure_dir(output_file)
     iperf_cmd = [
