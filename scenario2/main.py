@@ -125,7 +125,7 @@ def run_scenario():
     start_exp = time.perf_counter()
     with open(output_file, "a") as f:
         f.write("[t=0] Connecting to open5gs-1...\n")
-        f.write(f"[t=0] Starting continuous TCP background traffic ({TOTAL_TIME}s Total, "
+        f.write(f"[t=0] Starting continuous TCP background traffic {TOTAL_TIME}s Total, "
                 f"{DIVIDE_TIME - 0}s for Stage-1, {TOTAL_TIME - DIVIDE_TIME}s for Stage-2...\n")
 
     # Start gNB and UE for open5gs-1
