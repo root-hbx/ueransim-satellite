@@ -91,12 +91,12 @@ def iperf_tcp_test(
     port: int = 5201,
     output_file: str = "./test/iperf_tcp.txt",
     corenet_name: str = "",
-    totaldata: str = "20G",
-    interval: float = 1,
+    gen_time: float = 10.0,
+    interval: float = 1.0,
 ) -> bool:
     """
     Server: iperf -s -p 5201
-    Client: iperf -c [SERVER_IP] -p 5201 -n 20G -i 5 --bind [UESIMTUN0_IP] > ./test/iperf_tcp.txt 2>&1
+    Client: iperf -c [SERVER_IP] -p 5201 -t [TIME] -i 5 --bind [UESIMTUN0_IP] > ./test/iperf_tcp.txt 2>&1
 
     Args:
         server_ip: Server IP address (free5gc VM, for test)
@@ -118,7 +118,7 @@ def iperf_tcp_test(
         "iperf",
         "-c", server_ip,
         "-p", str(port),
-        "-n", totaldata,
+        "-t", str(gen_time),
         "-i", str(interval),
         "--bind", interface_ip,
     ]
@@ -137,6 +137,7 @@ def iperf_tcp_test(
                 check=True
             )
             out_file.write(f"Current NetInterface IP: {interface_ip}\n")
+            out_file.write(f"TCP Sending Time: {gen_time} seconds\n")
             out_file.write(f"iPerf Test Successful - {corenet_name}\n")
         logging.info(f"iPerf Test Successful - {corenet_name}")
         return True
@@ -147,15 +148,3 @@ def iperf_tcp_test(
         logging.error(f"iPerf Test Error: {str(e)}")
         return False
 
-
-# if __name__ == "__main__":
-#     # For Test
-#     iperf_tcp_test(
-#         server_ip="198.19.249.234",
-#         interface_ip=None,  # auto-fetch uesimtun0 IP
-#         port=5201,
-#         output_file="./test/iperf_tcp.txt",
-#         corenet_name="test-auto-fetch",
-#         totaldata="20G",
-#         interval=5,
-#     )
