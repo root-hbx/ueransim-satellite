@@ -218,7 +218,7 @@ def run_scenario():
         f.write(f"Total Run Time: {total_time:.4f} seconds\n")
         f.write(f"Service Delay 1: {service_delay_1:.4f} seconds\n")
         f.write(f"Service Delay 2: {service_delay_2:.4f} seconds\n")
-        f.write(f"Switch Timeing Cost: {total_time - TOTAL_TIME - service_delay_1 - service_delay_2} seconds\n")
+        f.write(f"Switch Timeing Cost: {(total_time - TOTAL_TIME - service_delay_1 - service_delay_2):.4f} seconds\n")
         """
         Theoretically:
         Total Run Time = Total TCP Time + Service Delay 1 + Switch Timing Cost + Service Delay 2
