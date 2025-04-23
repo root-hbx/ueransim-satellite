@@ -112,7 +112,7 @@ else:
     lines2, labels2 = ax2.get_legend_handles_labels()
     ax1.legend(lines1 + lines2, ['Actual Data'] + ['Link Utilization Rate'], loc='upper left')
 
-    plt.title('Switching: Link Utilization && Actual Data Transferred')
+    plt.title('Switching Flows: Link Utilization && Actual Data Transferred')
     plt.grid(True)
     fig.tight_layout()
     # plt.show()

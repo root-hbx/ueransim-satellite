@@ -132,13 +132,13 @@ sorted_std_data = sorted(zip(std_tcp_times, std_actual_datas))
 sorted_std_times = [x[0] for x in sorted_std_data]
 sorted_std_actual_datas = [x[1] for x in sorted_std_data]
 
-ax.scatter(sorted_test_times, sorted_test_actual_datas, color='tab:red', label='Test Data Transferred')
+ax.scatter(sorted_test_times, sorted_test_actual_datas, color='tab:red', label='Switching Flows')
 ax.plot(sorted_test_times, sorted_test_actual_datas, color='tab:red', linestyle='-', linewidth=1.5)
 for x, y in zip(sorted_test_times, sorted_test_actual_datas):
     ax.annotate(f'{y:.1f}', (x, y), textcoords="offset points", 
                 xytext=(0,10), ha='center', fontsize=8, color='tab:red')
 
-ax.scatter(sorted_std_times, sorted_std_actual_datas, color='tab:blue', label='Standard Data Transferred')
+ax.scatter(sorted_std_times, sorted_std_actual_datas, color='tab:blue', label='Stable Flow')
 ax.plot(sorted_std_times, sorted_std_actual_datas, color='tab:blue', linestyle='-', linewidth=1.5)
 for x, y in zip(sorted_std_times, sorted_std_actual_datas):
     ax.annotate(f'{y:.1f}', (x, y), textcoords="offset points", 

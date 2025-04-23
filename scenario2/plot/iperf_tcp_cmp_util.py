@@ -132,10 +132,10 @@ sorted_std_data = sorted(zip(std_tcp_times, std_link_util_rates))
 sorted_std_times = [x[0] for x in sorted_std_data]
 sorted_std_util_rates = [x[1] for x in sorted_std_data]
 
-ax.scatter(sorted_test_times, sorted_test_util_rates, color='tab:red', label='Test Link Utilization')
+ax.scatter(sorted_test_times, sorted_test_util_rates, color='tab:red', label='Switching Flows')
 ax.plot(sorted_test_times, sorted_test_util_rates, color='tab:red', linestyle='-', linewidth=1.5)
 
-ax.scatter(sorted_std_times, sorted_std_util_rates, color='tab:blue', label='Standard Link Utilization')
+ax.scatter(sorted_std_times, sorted_std_util_rates, color='tab:blue', label='Stable Flow')
 ax.plot(sorted_std_times, sorted_std_util_rates, color='tab:blue', linestyle='-', linewidth=1.5)
 
 ax.set_xlabel('TCP Transmitted Time (s)')
