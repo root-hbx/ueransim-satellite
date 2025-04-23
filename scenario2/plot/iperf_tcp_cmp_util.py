@@ -146,6 +146,5 @@ ax.legend(loc='best')
 
 plt.title('Comparison of Link Utilization Rates')
 fig.tight_layout()
-plt.savefig('../image/iperf_tcp_comparison.png', dpi=300)
-print("Plot saved to '../image/iperf_tcp_comparison.png'")
+plt.savefig('../image/iperf_tcp_comparison_util.png', dpi=300)
 

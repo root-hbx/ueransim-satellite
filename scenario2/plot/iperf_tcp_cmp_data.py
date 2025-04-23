@@ -124,28 +124,32 @@ assert test_valid and std_valid, print("Could not create plot due to data validi
 
 fig, ax = plt.subplots(figsize=(10, 6))
 
-sorted_test_data = sorted(zip(test_tcp_times, test_link_util_rates))
+sorted_test_data = sorted(zip(test_tcp_times, test_actual_datas))
 sorted_test_times = [x[0] for x in sorted_test_data]
-sorted_test_util_rates = [x[1] for x in sorted_test_data]
+sorted_test_actual_datas = [x[1] for x in sorted_test_data]
 
-sorted_std_data = sorted(zip(std_tcp_times, std_link_util_rates))
+sorted_std_data = sorted(zip(std_tcp_times, std_actual_datas))
 sorted_std_times = [x[0] for x in sorted_std_data]
-sorted_std_util_rates = [x[1] for x in sorted_std_data]
+sorted_std_actual_datas = [x[1] for x in sorted_std_data]
 
-ax.scatter(sorted_test_times, sorted_test_util_rates, color='tab:red', label='Test Link Utilization')
-ax.plot(sorted_test_times, sorted_test_util_rates, color='tab:red', linestyle='-', linewidth=1.5)
+ax.scatter(sorted_test_times, sorted_test_actual_datas, color='tab:red', label='Test Data Transferred')
+ax.plot(sorted_test_times, sorted_test_actual_datas, color='tab:red', linestyle='-', linewidth=1.5)
+for x, y in zip(sorted_test_times, sorted_test_actual_datas):
+    ax.annotate(f'{y:.1f}', (x, y), textcoords="offset points", 
+                xytext=(0,10), ha='center', fontsize=8, color='tab:red')
 
-ax.scatter(sorted_std_times, sorted_std_util_rates, color='tab:blue', label='Standard Link Utilization')
-ax.plot(sorted_std_times, sorted_std_util_rates, color='tab:blue', linestyle='-', linewidth=1.5)
+ax.scatter(sorted_std_times, sorted_std_actual_datas, color='tab:blue', label='Standard Data Transferred')
+ax.plot(sorted_std_times, sorted_std_actual_datas, color='tab:blue', linestyle='-', linewidth=1.5)
+for x, y in zip(sorted_std_times, sorted_std_actual_datas):
+    ax.annotate(f'{y:.1f}', (x, y), textcoords="offset points", 
+                xytext=(0,-15), ha='center', fontsize=8, color='tab:blue')
 
 ax.set_xlabel('TCP Transmitted Time (s)')
-ax.set_ylabel('Link Utilization Rate')
-ax.set_ylim(0, 1)
+ax.set_ylabel('TCP Data Transferred (MB)')
 ax.grid(True)
 ax.legend(loc='best')
 
-plt.title('Comparison of Link Utilization Rates')
+plt.title('Comparison of TCP Data Transferred')
 fig.tight_layout()
-plt.savefig('../image/iperf_tcp_comparison.png', dpi=300)
-print("Plot saved to '../image/iperf_tcp_comparison.png'")
+plt.savefig('../image/iperf_tcp_comparison_data.png', dpi=300)
 
