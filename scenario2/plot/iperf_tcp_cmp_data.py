@@ -151,5 +151,5 @@ ax.legend(loc='best')
 
 plt.title('Comparison of TCP Data Transferred')
 fig.tight_layout()
-plt.savefig('../image/iperf_tcp_comparison_data.png', dpi=300)
+plt.savefig('../image/iperf_tcp_cmp_data.png', dpi=300)
 

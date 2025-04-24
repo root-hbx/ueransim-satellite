@@ -11,7 +11,7 @@ def check_data_validity(folder_name, tcp_times, theo_datas, actual_datas, link_u
     print("Actual data points:", len(actual_datas))
     print("Link utilization rate points:", len(link_util_rates))
     print()
-    
+
     if len(tcp_times) != len(link_util_rates):
         print(f"Warning: Data length mismatch in {folder_name} folder")
         return False
@@ -146,5 +146,5 @@ ax.legend(loc='best')
 
 plt.title('Comparison of Link Utilization Rates')
 fig.tight_layout()
-plt.savefig('../image/iperf_tcp_comparison_util.png', dpi=300)
+plt.savefig('../image/iperf_tcp_cmp_util.png', dpi=300)
 
