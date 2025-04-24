@@ -99,6 +99,9 @@ else:
     ax1.scatter(sorted_tcp_times, sorted_actual_datas, color=color1)
     ax1.plot(sorted_tcp_times, sorted_actual_datas, color=color1, linestyle='-', linewidth=1.5)
     ax1.tick_params(axis='y', labelcolor=color1)
+    for x, y in zip(sorted_tcp_times, sorted_actual_datas):
+        ax1.annotate(f'{y:.1f}', (x, y), textcoords="offset points", 
+                    xytext=(0,10), ha='center', fontsize=8, color=color1)
 
     ax2 = ax1.twinx()
     color2 = 'tab:blue'
