@@ -75,6 +75,10 @@ sudo ip route del default dev ens33
 Set `uesimtun0` as dafault:
 
 ```
+sudo ip route add default dev uesimtun0
+```
+
+```
 ueransim@ueransim:~/ueransim-satellite/dash-test$ ip route show default
 default dev uesimtun0 scope link 
 ```
