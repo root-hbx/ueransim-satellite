@@ -12,7 +12,7 @@ How to Run:
 
 (1) Live Server
 
-Strongly Recommended
+Recommended when you wanna test for functionality
 
 
 (2) Python HTTP.Server
@@ -21,7 +21,7 @@ Strongly Recommended
 python3 -m http.server 8080
 ```
 
-Not Recommended
+Recommended when you wanna test in python scripts
 
 ## Steps
 
