@@ -23,6 +23,10 @@ python3 -m http.server 8080
 
 Recommended when you wanna test in python scripts
 
+When you use the command `python3 -m http.server 8080`, it actually starts the built-in HTTP server module of Python instead of calling any specific script.
+
+When a user visits `http://localhost:8080/`, the server automatically provides the `index.html` file as the default page
+
 ## Steps
 
 ### Start Open5gs-2
