@@ -1,0 +1,55 @@
+body { 
+    margin: 20px; 
+    font-family: Arial, sans-serif; 
+}
+#stats { 
+    margin-top: 20px; 
+    font-family: monospace; 
+}
+
+/* video container size */
+.dash-video-player {
+    max-width: 600px;
+    margin: 0;
+}
+
+#videoContainer {
+    position: relative;
+    width: 100%;
+}
+
+#videoPlayer {
+    width: 100%;
+    height: auto;
+    max-height: 350px;
+}
+
+/* controlbar size*/
+.video-controller {
+    width: 100%;
+    max-width: 600px;
+}
+
+.seekContainer {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Metrics panel styling */
+.metrics-panel {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+.metrics-panel h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+.metrics-panel .metric-item {
+    margin-bottom: 8px;
+}
+.metrics-panel .metric-label {
+    font-weight: bold;
+}
