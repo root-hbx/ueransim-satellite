@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+    <title>Dash.js via Open5GS</title>
+    <style>
+        body { margin: 20px; font-family: Arial, sans-serif; }
+        #videoPlayer { width: 640px; height: 360px; }
+        #stats { margin-top: 20px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h2>Open5GS Network Video Test</h2>
+    <video id="videoPlayer" controls></video>
+    <div>
+        <button id="switchBtn">CoreNet Switching Simulation</button>
+        <button id="statsBtn">Statistics</button>
+    </div>
+    <div id="stats"></div>
+
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+    <script>
+        (function() {
+            var url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
+            var player = dashjs.MediaPlayer().create();
+           
+            // buffer management
+            player.updateSettings({
+                streaming: {
+                    buffer: {
+                        bufferTimeAtTopQuality: 12,
+                        bufferTimeAtTopQualityLongForm: 12,
+                        bufferTimeDefault: 12,
+                        longFormContentDurationThreshold: 600,
+                    }
+                }
+            });
+
+            // performance monitor
+            player.on('bufferLevel', function() {
+                document.getElementById('stats').innerText = 
+                    'Buffer: ' + player.getBufferLength() + 's\n' +
+                    'Average Throughput: ' + Math.round(player.getAverageThroughput('video')/1000) + ' Kbps\n' +
+                    'Quality: ' + player.getQualityFor('video') + '\n' +
+                    'Latency: ' + player.getCurrentLiveLatency() + 's';
+            });
+           
+            player.initialize(document.querySelector("#videoPlayer"), url, true);
+
+
+            // js interaction with scripts
+            document.getElementById('switchBtn').onclick = function() {
+                alert('See what happens when you switch the core network');
+            };
+            
+            window.player = player;
+        })();
+    </script>
+</body>
+</html>
