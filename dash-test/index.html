@@ -20,11 +20,19 @@
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <script>
         (function() {
-            var url = "https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd";
+            var url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
             var player = dashjs.MediaPlayer().create();
-            player.initialize(document.querySelector("#videoPlayer"), url, true);
             
-            // 添加性能监控
+            player.updateSettings({
+                streaming: {
+                    buffer: {
+                        bufferPruningInterval: 1,
+                        bufferToKeep: 60,
+                    }
+                }
+            });
+
+            // performance monitor
             player.on('bufferLevel', function() {
                 document.getElementById('stats').innerText = 
                     'Buffer: ' + player.getBufferLength() + 's\n' +
@@ -32,8 +40,11 @@
                     'Quality: ' + player.getQualityFor('video') + '\n' +
                     'Latency: ' + player.getCurrentLiveLatency() + 's';
             });
-            
-            // 模拟按钮
+           
+            player.initialize(document.querySelector("#videoPlayer"), url, true);
+
+
+            // js interaction with scripts
             document.getElementById('switchBtn').onclick = function() {
                 alert('See what happens when you switch the core network');
             };
