@@ -1101,9 +1101,10 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         var config = {
             streaming: {
                 buffer: {
-                    bufferTimeDefault: $scope.defaultStableBufferDelay,
-                    bufferTimeAtTopQuality: $scope.defaultBufferTimeAtTopQuality,
-                    bufferTimeAtTopQualityLongForm: $scope.defaultBufferTimeAtTopQualityLongForm,
+                    bufferTimeDefault: $scope.manualBufferSet ? $scope.manualStableBufferDelay : $scope.defaultStableBufferDelay,
+                    bufferTimeAtTopQuality: $scope.manualBufferSet ? $scope.manualBufferTimeAtTopQuality : $scope.defaultBufferTimeAtTopQuality,
+                    bufferTimeAtTopQualityLongForm: $scope.manualBufferSet ? $scope.manualBufferTimeAtTopQualityLongForm : $scope.defaultBufferTimeAtTopQualityLongForm,
+                    longFormContentDurationThreshold: $scope.manualBufferSet ? $scope.manualLongFormThreshold : $scope.defaultLongFormThreshold,
                 },
                 delay: {
                     liveDelay: $scope.defaultLiveDelay
@@ -1732,6 +1733,47 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         return settingDifferencesObject;
     }
 
+    // TODO(bxhu): buffer management manually
+    $scope.manualSetBuffer = function (bufferDefault, topQuality, topQualityLongForm, longFormThreshold) {
+        $scope.player.updateSettings({
+            streaming: {
+                buffer: {
+                    bufferTimeDefault: bufferDefault,
+                    bufferTimeAtTopQuality: topQuality,
+                    bufferTimeAtTopQualityLongForm: topQualityLongForm,
+                    longFormContentDurationThreshold: longFormThreshold,
+                }
+            }
+        });
+        
+        $scope.manualStableBufferDelay = bufferDefault;
+        $scope.manualBufferTimeAtTopQuality = topQuality;
+        $scope.manualBufferTimeAtTopQualityLongForm = topQualityLongForm;
+        $scope.manualLongFormThreshold = longFormThreshold;
+        // flag to indicate that the buffer settings have been manually set
+        $scope.manualBufferSet = true;
+        
+        console.log('[Manually Buffer Settings]')
+        console.log('Buffer settings manually updated:',
+            'Default:', $scope.manualStableBufferDelay,
+            'TopQuality:', $scope.manualBufferTimeAtTopQuality,
+            'TopQualityLongForm:', $scope.manualBufferTimeAtTopQualityLongForm,
+            'LongFormThreshold:', $scope.manualLongFormThreshold
+        );
+        
+        if (document.getElementById('bufferTimeDefault')) {
+            document.getElementById('bufferTimeDefault').value = bufferDefault;
+        }
+        
+        return {
+            bufferTimeDefault: bufferDefault,
+            bufferTimeAtTopQuality: topQuality,
+            bufferTimeAtTopQualityLongForm: topQualityLongForm,
+            longFormContentDurationThreshold: longFormThreshold
+        };
+    };
+    
+
     function _arraysEqual(a, b) {
         if (a === b) {
             return true;
@@ -2280,14 +2322,28 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     ////////////////////////////////////////
 
     function setLatencyAttributes() {
-        // get buffer default value
         var currentConfig = $scope.player.getSettings();
         $scope.defaultLiveDelay = currentConfig.streaming.delay.liveDelay;
+
+        // TODO(bxhu): get buffer default value
         $scope.defaultStableBufferDelay = currentConfig.streaming.buffer.bufferTimeDefault;
         $scope.defaultBufferTimeAtTopQuality = currentConfig.streaming.buffer.bufferTimeAtTopQuality;
         $scope.defaultBufferTimeAtTopQualityLongForm = currentConfig.streaming.buffer.bufferTimeAtTopQualityLongForm;
+        $scope.defaultLongFormThreshold = currentConfig.streaming.buffer.longFormContentDurationThreshold;
+
+        // TODO(bxhu): init for "manualSetBuffer" function
+        $scope.manualStableBufferDelay = currentConfig.streaming.buffer.bufferTimeDefault;
+        $scope.manualBufferTimeAtTopQuality = currentConfig.streaming.buffer.bufferTimeAtTopQuality;
+        $scope.manualBufferTimeAtTopQualityLongForm = currentConfig.streaming.buffer.bufferTimeAtTopQualityLongForm;
+        $scope.manualLongFormThreshold = currentConfig.streaming.buffer.longFormContentDurationThreshold;
+
         $scope.liveCatchupEnabled = currentConfig.streaming.liveCatchup.enabled;
         $scope.liveCatchupMode = currentConfig.streaming.liveCatchup.mode;
+
+        // TODO(bxhu): logging
+        console.log('[Init Buffer Settings]')
+        console.log('Default Buffer Settings:', $scope.defaultStableBufferDelay, $scope.defaultBufferTimeAtTopQuality, $scope.defaultBufferTimeAtTopQualityLongForm, $scope.defaultLongFormThreshold);
+        console.log('Manual Buffer Settings:', $scope.manualStableBufferDelay, $scope.manualBufferTimeAtTopQuality, $scope.manualBufferTimeAtTopQualityLongForm, $scope.manualLongFormThreshold);
     }
 
     function setAbrRules() {
@@ -2456,6 +2512,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     }
 
 
+    // TODO(bxhu): main func logic
     (function init() {
 
         ////////////////////////////////////////
@@ -2500,7 +2557,12 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 $scope.setQueryData(currentQuery);
             }
 
+            // init buffer settings with default values
             setLatencyAttributes();
+
+            // TODO(bxhu): buffer management settings, here to avoid overriding
+            angular.element(document.body).scope().manualSetBuffer(12, 12, 12, 600);
+
             setAbrRules();
             setAdditionalPlaybackOptions();
             setAdditionalAbrOptions();
@@ -2541,6 +2603,10 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             if ($scope.autoLoadSelected && $scope.selectedItem) {
                 $scope.doLoad();
             }
+
+            console.log('[After All Init Processes]');
+            console.log('Default Buffer Settings:', $scope.defaultStableBufferDelay, $scope.defaultBufferTimeAtTopQuality, $scope.defaultBufferTimeAtTopQualityLongForm, $scope.defaultLongFormThreshold);
+            console.log('Manual Buffer Settings:', $scope.manualStableBufferDelay, $scope.manualBufferTimeAtTopQuality, $scope.manualBufferTimeAtTopQualityLongForm, $scope.manualLongFormThreshold);
         }
 
         reqConfig.open('GET', 'dashjs_config.json', true);
