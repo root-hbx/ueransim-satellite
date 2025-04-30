@@ -1,9 +1,9 @@
 # Dash.js Application
 
-## Script
+## Script for Tests
 
 ```
-index.html
+./index.html
 ```
 
 ## Commands
@@ -87,3 +87,23 @@ ueransim@ueransim:~/ueransim-satellite/dash-test$ ip route show default
 default dev uesimtun0 scope link 
 ```
 
+## Script for Experiments
+
+```
+../satellite-flow/samples/dash-if-reference-player/index.html
+```
+
+How to Run:
+
+```
+cd ../satellite-flow/
+python3 -m http.server 8080
+```
+
+Then, in your web browser, input:
+
+```
+http://localhost:8000/samples/dash-if-reference-player/
+```
+
+Now we are all good :))
