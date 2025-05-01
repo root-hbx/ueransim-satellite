@@ -1,6 +1,7 @@
 import logging
 import subprocess
 
+
 def start_wondershaper_service() -> None:
     """Start the wondershaper service"""
     try:
@@ -17,4 +18,5 @@ def stop_wondershaper_service() -> None:
         logging.info("Wondershaper service stopped")
     except subprocess.CalledProcessError as e:
         logging.error(f"Error stopping wondershaper service: {e}")
+
 

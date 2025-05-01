@@ -1,6 +1,7 @@
 import textwrap
 import sys
 
+
 def show_help():
     """Display detailed help information for all available commands"""
     help_text = """
@@ -50,6 +51,4 @@ def show_help():
     # Return success code
     return 0
 
-if __name__ == "__main__":
-    # Can be run directly for testing
-    sys.exit(show_help())
+

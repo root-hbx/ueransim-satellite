@@ -8,6 +8,7 @@ from cmds.network import (
 )
 from cmds.service_helper import stop_wondershaper_service, start_wondershaper_service
 
+
 def switch_command(new_corenet, output_file=None, gen_time=30.0):
     """Switch to a different core network"""
     state = load_state()
@@ -93,3 +94,5 @@ def switch_command(new_corenet, output_file=None, gen_time=30.0):
     logging.info(f"New Interface IP: {interface_ip}")
     
     return True
+
+

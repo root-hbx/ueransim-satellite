@@ -7,7 +7,7 @@ from cmds.start import start_command
 from cmds.switch import switch_command
 from cmds.stop import stop_command
 from cmds.admin import check_admin
-from cmds.help import show_help
+from cmds.help_msg import show_help
 
 logging.basicConfig(level=logging.INFO)
 
@@ -64,3 +64,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

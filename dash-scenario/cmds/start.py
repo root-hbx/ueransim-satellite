@@ -8,6 +8,7 @@ from cmds.network import (
 )
 from cmds.service_helper import start_wondershaper_service
 
+
 def start_command(corenet, output_file=None, gen_time=30.0):
     """Start connection to a core network"""
     state = load_state()
@@ -83,3 +84,5 @@ def start_command(corenet, output_file=None, gen_time=30.0):
     logging.info(f"Interface IP: {interface_ip}")
     
     return True
+
+

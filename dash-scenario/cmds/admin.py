@@ -2,6 +2,7 @@ import subprocess
 import logging
 import sys
 
+
 def check_admin():
     """
     Check for sudo privileges
@@ -24,3 +25,5 @@ def check_admin():
         logging.error(f"Invalid Permissions: {e}")
         print("Failed! Please check your password as a root admin :(")
         return False
+    
+    

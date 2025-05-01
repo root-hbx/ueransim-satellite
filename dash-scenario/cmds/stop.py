@@ -5,6 +5,7 @@ from cmds.state import load_state, clear_state
 from cmds.network import terminate_processes
 from cmds.service_helper import stop_wondershaper_service
 
+
 def stop_command():
     """Stop current connection"""
     state = load_state()
@@ -34,3 +35,5 @@ def stop_command():
     
     logging.info("Connection stopped successfully")
     return True
+
+

@@ -7,6 +7,14 @@ import threading
 from cmds.state import ROOT_DIR, FREE5GC_IP
 from cmds.service_helper import start_wondershaper_service, stop_wondershaper_service
 
+
+def ensure_dir(file_path):
+    """Ensure directory exists for the given file path"""
+    directory = os.path.dirname(file_path)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory)
+
+
 def start_gnb(config_file):
     """Start gNB with the given configuration file"""
     logging.info("Starting gNB...")
@@ -18,6 +26,7 @@ def start_gnb(config_file):
     gnb_process = subprocess.Popen(gnb_cmd, cwd=ROOT_DIR)
     logging.info(f"gNB process started (PID: {gnb_process.pid})")
     return gnb_process.pid
+
 
 def start_ue(config_file):
     """Start UE with the given configuration file"""
@@ -31,6 +40,7 @@ def start_ue(config_file):
     ue_process = subprocess.Popen(ue_cmd, cwd=ROOT_DIR)
     logging.info(f"UE process started (PID: {ue_process.pid})")
     return ue_process.pid
+
 
 def wait_for_uesimtun0_ip(max_attempts=300, delay=0.1):
     """Wait for uesimtun0 to get an IP address"""
@@ -57,6 +67,7 @@ def wait_for_uesimtun0_ip(max_attempts=300, delay=0.1):
     
     raise Exception("Failed to get IP address for uesimtun0")
 
+
 def terminate_processes(gnb_pid, ue_pid):
     """Terminate gNB and UE processes"""
     if gnb_pid:
@@ -72,6 +83,7 @@ def terminate_processes(gnb_pid, ue_pid):
             logging.info("UE process has been killed")
         except Exception as e:
             logging.error(f"Error killing UE process: {e}")
+
 
 def start_iperf_tcp_test(server_ip, interface_ip, port, output_file, corenet_name, gen_time, interval=1):
     """Start iperf TCP test in the background and return the process"""
@@ -96,8 +108,4 @@ def start_iperf_tcp_test(server_ip, interface_ip, port, output_file, corenet_nam
     
     return iperf_process.pid
 
-def ensure_dir(file_path):
-    """Ensure directory exists for the given file path"""
-    directory = os.path.dirname(file_path)
-    if directory and not os.path.exists(directory):
-        os.makedirs(directory)
+

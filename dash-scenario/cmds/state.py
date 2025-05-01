@@ -5,6 +5,7 @@ import tempfile
 import json
 import logging
 
+
 # Global constants
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 FREE5GC_IP = "172.16.162.135"
@@ -48,3 +49,5 @@ def clear_state():
     """Clear the current state"""
     if os.path.exists(STATE_FILE):
         os.remove(STATE_FILE)
+
+
