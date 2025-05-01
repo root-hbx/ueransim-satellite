@@ -7,6 +7,7 @@ from cmds.start import start_command
 from cmds.switch import switch_command
 from cmds.stop import stop_command
 from cmds.admin import check_admin
+from cmds.help import show_help
 
 logging.basicConfig(level=logging.INFO)
 
@@ -35,18 +36,22 @@ def create_parser():
     # Stop command
     stop_parser = subparsers.add_parser('stop', help='Stop current connection')
     
+    # Help command
+    help_parser = subparsers.add_parser('help', help='Show detailed help information')
+    
     return parser
 
 def main():
     parser = create_parser()
     args = parser.parse_args()
     
-    if not args.command:
-        parser.print_help()
-        sys.exit(1)
+    # If no command provided or help command, show help
+    if not args.command or args.command == 'help':
+        show_help()
+        return
     
-    # Check admin permissions
-    if not check_admin():
+    # Check admin permissions for commands that need it
+    if args.command in ['start', 'switch', 'stop'] and not check_admin():
         sys.exit(1)
     
     # Execute command
