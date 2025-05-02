@@ -4,8 +4,7 @@ import os
 from cmds.state import ROOT_DIR, save_state, load_state
 from cmds.network import (
     start_gnb, start_ue, 
-    wait_for_uesimtun0_ip, 
-    ensure_dir
+    wait_for_uesimtun0_ip, ensure_dir
 )
 from cmds.service_helper import start_wondershaper_service
 

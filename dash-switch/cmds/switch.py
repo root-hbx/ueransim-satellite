@@ -1,7 +1,6 @@
 import time
 import logging
-import os
-from cmds.state import ROOT_DIR, FREE5GC_IP, save_state, load_state
+from cmds.state import save_state, load_state
 from cmds.network import (
     terminate_processes, start_gnb, start_ue, 
     wait_for_uesimtun0_ip, ensure_dir

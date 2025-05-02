@@ -1,5 +1,4 @@
 import textwrap
-import sys
 
 def show_help():
     """Display detailed help information for all available commands"""

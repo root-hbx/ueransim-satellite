@@ -1,10 +1,8 @@
 import os
 import subprocess
 import time
-import socket
 import logging
-import threading
-from cmds.state import ROOT_DIR, FREE5GC_IP
+from cmds.state import ROOT_DIR
 
 
 def ensure_dir(file_path):
