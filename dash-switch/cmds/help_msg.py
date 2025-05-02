@@ -12,7 +12,7 @@ def show_help():
     
     start <corenet>      Start connection to a core network
       Options:
-        <corenet>        Core network to connect to (open5gs1 or open5gs2)
+        <corenet>        Core network to connect to (open5gs1 / open5gs2)
         -o, --output     Output file for logs (default: ./test/<corenet>_tcp_traffic.txt)
       
       Example:
@@ -30,20 +30,21 @@ def show_help():
       
       Example:
         uersat stop
+        
+    show                 Show current connection status (PID / INTERFACE_IP / CORENET)
+    
+      Example:
+        uersat show
     
     help                 Show this help message
       
       Example:
-        uersat help
-        uersat -h
-        uersat --help
+        uersat help / -h / --help
     
     Usage Notes:
-    - All commands requiring network changes need sudo/root privileges
     - Use 'start' to initiate a connection before using 'switch'
-    - Each connection generates TCP traffic using iperf3
     - The tool maintains state between calls, so you can start, switch, or stop in separate sessions
-    - Configuration files are expected in the config/ directory
+    - Configuration yaml files are expected in the UERSIM-SATELITE/config/
     """
     
     # Print formatted help text
