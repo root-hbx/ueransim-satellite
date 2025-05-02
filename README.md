@@ -30,4 +30,10 @@ This repo is inspired by [UERANSIM](https://github.com/aligungr/UERANSIM/wiki).
 - `iperf-server`: UERANSIM && (open5gs1 -> open5gs2)
     - iPerf server scripts, directly running on iPerf Server Machine
     - `ueransim/scenario/server_monitor.py`
+- `dash-test`: DASH.JS on UERANSIM VM
+    - `satellite-flow`: dash.js all-in-one, we need `satellite-flow/samples/dash-if-reference-player/index.html` (for [#issue_2](https://github.com/root-hbx/ueransim-satellite/issues/2))
+    - `dash-test`: basic dash.js modules for unit test (for [#issue 1](https://github.com/root-hbx/ueransim-satellite/issues/1))
+    - `dash-switch`: corenet switching logic / scripts for dash.js (for [#issue_3](https://github.com/root-hbx/ueransim-satellite/issues/3))
+    - `refactor-scenario2`: refactor for `scenario2 (tcp-test)`. WIP.
+
 
