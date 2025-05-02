@@ -8,6 +8,7 @@ from cmds.switch import switch_command
 from cmds.stop import stop_command
 from cmds.admin import check_admin
 from cmds.help_msg import show_help
+from cmds.state import show_ps_state
 
 
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +46,9 @@ def create_parser():
     # Stop command
     stop_parser = subparsers.add_parser('stop', help='Stop current connection')
     
+    # Show command
+    show_parser = subparsers.add_parser('show', help='Show current connection status')
+    
     # Help command
     help_parser = subparsers.add_parser('help', help='Show detailed help information')
     
@@ -71,6 +75,8 @@ def main():
         switch_command(args.corenet, args.output)
     elif args.command == 'stop':
         stop_command()
+    elif args.command == 'show':
+        show_ps_state()
 
 
 if __name__ == "__main__":

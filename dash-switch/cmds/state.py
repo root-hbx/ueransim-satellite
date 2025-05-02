@@ -13,13 +13,14 @@ STATE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file_
 if not os.path.exists(STATE_DIR):
     os.makedirs(STATE_DIR)
 
-# dash-switch/cmds/state/ueransim_state.json
+# dash-switch/state/ueransim_state.json
 STATE_FILE = os.path.join(STATE_DIR, "ueransim_state.json")
 
 def save_state(state_data):
     """Save the current state to a file"""
     with open(STATE_FILE, 'w') as f:
         json.dump(state_data, f)
+    show_ps_state()
 
 
 def load_state():
@@ -45,11 +46,24 @@ def load_state():
             'current_corenet': None,
             'start_time': None,
         }
+    show_ps_state()
 
 
 def clear_state():
     """Clear the current state"""
     if os.path.exists(STATE_FILE):
         os.remove(STATE_FILE)
+    show_ps_state()
 
 
+def show_ps_state():
+    """Show the current state of the system"""
+    state = load_state()
+    print("Current State:")
+    print(f"- gNB PID: {state['gnb_pid']}")
+    print(f"- UE PID: {state['ue_pid']}")
+    print(f"- Interface IP: {state['interface_ip']}")
+    print(f"- Current Core Network: {state['current_corenet']}")
+    print(f"- Start Time: {state['start_time']}")
+    
+    
