@@ -12,11 +12,14 @@ from cmds.service_helper import start_wondershaper_service
 
 def start_command(corenet, output_file=None):
     """Start connection to a core network"""
+    
+    # Load current state
     state = load_state()
     
     # Check if there's already a connection
     if state['gnb_pid'] or state['ue_pid']:
-        logging.error("A connection is already active. Use 'switch' to change or 'stop' to terminate.")
+        logging.error("A connection is already active. "
+                    "Use 'switch' to change or 'stop' to terminate.")
         return False
     
     # Set default output file if none provided
@@ -28,12 +31,21 @@ def start_command(corenet, output_file=None):
     
     # Record start time
     start_time = time.perf_counter()
-    
     with open(output_file, "a") as f:
         f.write(f"[t=0] Connecting to {corenet}...\n")
     
-    config_file = f"config/{corenet}-gnb.yaml"
-    ue_config_file = f"config/{corenet}-ue.yaml"
+    # Fetch Corresponding config files
+    try: 
+        config_file = os.path.join(ROOT_DIR, "config", f"{corenet}-gnb.yaml")
+        ue_config_file = os.path.join(ROOT_DIR, "config", f"{corenet}-ue.yaml")
+        if not os.path.exists(config_file) or not os.path.exists(ue_config_file):
+            raise FileNotFoundError(f"Config files for {corenet} not found.")
+    except FileNotFoundError as e:
+        logging.error(e)
+        return False
+    except Exception as e:  
+        logging.error(f"Unexpected error: {e}")
+        return False
     
     # Start gNB and UE
     gnb_pid = start_gnb(config_file)
