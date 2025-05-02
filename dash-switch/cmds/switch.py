@@ -9,12 +9,12 @@ from cmds.network import (
 from cmds.service_helper import stop_wondershaper_service, start_wondershaper_service
 
 
-def switch_command(new_corenet, output_file=None):
+def switch_command(new_corenet="open5gs2", output_file=None):
     """Switch to a different core network"""
-    state = load_state()
+    ori_state = load_state()
     
-    # Check if there's an active connection
-    if not state['gnb_pid'] and not state['ue_pid']:
+    # Need an existing connection
+    if not ori_state['gnb_pid'] and not ori_state['ue_pid']:
         logging.error("No active connection. Use 'start' first.")
         return False
     
@@ -26,9 +26,9 @@ def switch_command(new_corenet, output_file=None):
     ensure_dir(output_file)
     
     # Get old connection details
-    old_corenet = state['current_corenet']
-    old_interface_ip = state['interface_ip']
-    original_start_time = state['start_time']
+    old_corenet = ori_state['current_corenet']
+    old_interface_ip = ori_state['interface_ip']
+    original_start_time = ori_state['start_time']
     
     switch_start_time = time.perf_counter()
     
@@ -39,7 +39,7 @@ def switch_command(new_corenet, output_file=None):
     stop_wondershaper_service()
     
     # Terminate old processes
-    terminate_processes(state['gnb_pid'], state['ue_pid'])
+    terminate_processes(ori_state['gnb_pid'], ori_state['ue_pid'])
     
     termination_time = time.perf_counter()
     
@@ -63,14 +63,14 @@ def switch_command(new_corenet, output_file=None):
     service_start = time.perf_counter()
     
     # Update state
-    state = {
+    updated_state = {
         'gnb_pid': gnb_pid,
         'ue_pid': ue_pid,
         'interface_ip': interface_ip,
         'current_corenet': new_corenet,
         'start_time': original_start_time,  # Keep original start time for total elapsed time
     }
-    save_state(state)
+    save_state(updated_state)
     
     with open(output_file, "a") as f:
         f.write(f"[t = {termination_time - original_start_time}] Old connection terminated\n")

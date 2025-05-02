@@ -12,7 +12,12 @@ FREE5GC_IP = "172.16.162.135"
 BW_MAX = 200  # Mbps
 
 # State file for persisting running processes
-STATE_FILE = os.path.join(tempfile.gettempdir(), "ueransim_state.json")
+STATE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "state")
+if not os.path.exists(STATE_DIR):
+    os.makedirs(STATE_DIR)
+
+# dash-switch/cmds/state/ueransim_state.json
+STATE_FILE = os.path.join(STATE_DIR, "ueransim_state.json")
 
 def save_state(state_data):
     """Save the current state to a file"""

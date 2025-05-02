@@ -1,7 +1,7 @@
 import time
 import logging
 import os
-from cmds.state import ROOT_DIR, FREE5GC_IP, save_state, load_state
+from cmds.state import ROOT_DIR, save_state, load_state
 from cmds.network import (
     start_gnb, start_ue, 
     wait_for_uesimtun0_ip, 
@@ -10,7 +10,7 @@ from cmds.network import (
 from cmds.service_helper import start_wondershaper_service
 
 
-def start_command(corenet, output_file=None):
+def start_command(corenet="open5gs1", output_file=None):
     """Start connection to a core network"""
     
     # Load current state
