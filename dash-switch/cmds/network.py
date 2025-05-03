@@ -77,6 +77,13 @@ def modify_default_route():
     print("Modifying the default route to ueransim...")
     print("==========================================")
     
+    # 0. Release DHCP lease to prevent auto-renewal
+    try:
+        subprocess.run(["sudo", "dhclient", "-r", "ens33"], check=False)
+        logging.info("Released DHCP lease for ens33")
+    except Exception as e:
+        logging.error(f"Error releasing DHCP lease: {str(e)}")
+    
     # 1. Del ens33
     try:
         subprocess.run(["sudo", "ip", "route", "del", "default"], check=False)
@@ -113,24 +120,13 @@ def rollback_default_route():
     except Exception as e:
         logging.error(f"Error deleting routes: {str(e)}")
     
-    # 2. Restore original default route with gateway
+    # 2. Restart DHCP client to get proper configuration
     try:
-        """
-        (.venv) ueransim@ueransim:~/ueransim-satellite$ ip route show default
-        default via 172.16.162.2 dev ens33 proto dhcp src 172.16.162.134 metric 100 
-        """
-        subprocess.run([
-            "sudo", "ip", "route", "add", 
-            "default", "via", "172.16.162.2", 
-            "dev", "ens33", 
-            "proto", "dhcp", 
-            "src", "172.16.162.134", 
-            "metric", "100"
-        ], check=True)
-        logging.info("Original default route with gateway restored")
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error adding route: {str(e)}")
-        return False
+        subprocess.run(["sudo", "dhclient", "ens33"], check=False)
+        logging.info("DHCP client restarted for ens33")
+        time.sleep(8)
+    except Exception as e:
+        logging.error(f"Error restarting DHCP client: {str(e)}")
     
     # 3. show current situation
     print()
