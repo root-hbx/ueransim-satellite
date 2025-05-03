@@ -2,7 +2,7 @@ import time
 import logging
 import os
 from cmds.state import load_state, clear_state 
-from cmds.network import terminate_processes
+from cmds.network import terminate_processes, rollback_default_route
 from cmds.service_helper import stop_wondershaper_service
 
 
@@ -20,6 +20,10 @@ def stop_command():
     
     # Terminate processes
     terminate_processes(state['gnb_pid'], state['ue_pid'])
+    
+    # Rollback default route
+    rollback_default_route()
+    time.sleep(1)
     
     # Clear state
     clear_state()

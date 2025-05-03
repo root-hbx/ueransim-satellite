@@ -65,6 +65,88 @@ def wait_for_uesimtun0_ip(max_attempts=300, delay=0.1):
     raise Exception("Failed to get IP address for uesimtun0")
 
 
+def modify_default_route():
+    """
+    Modify the default route to use uesimtun0 instead of ens33.
+    1. Delete default route for ens33
+    2. Add uesimtun0 as the default route
+    3. Showcase current situation
+    """
+    
+    print("==========================================")
+    print("Modifying the default route to ueransim...")
+    print("==========================================")
+    
+    # 1. Del ens33
+    try:
+        subprocess.run(["sudo", "pkill", "dhclient"], check=False)
+        subprocess.run(["sudo", "ip", "route", "del", "default", "dev", "ens33"], check=False)
+        logging.info("ens33 default route deleted")
+    except Exception as e:
+        logging.error(f"{str(e)}")
+    
+    # 2. Add uesimtun0
+    try:
+        subprocess.run(["sudo", "ip", "route", "add", "default", "dev", "uesimtun0"], check=True)
+        logging.info("uesimtun0 default route added")
+    except subprocess.CalledProcessError as e:
+        logging.info(f"{str(e)}")
+        return False
+    
+    # 3. show current situation
+    print()
+    show_default_route()
+    
+    return True
+
+
+def rollback_default_route():
+    """Rollback the default route to ens33"""
+    
+    print("==========================================")
+    print("Rolling back the default route to ens33...")
+    print("==========================================")
+    
+    # 1. Del uesimtun0
+    # try:
+    #     subprocess.run(["sudo", "ip", "route", "del", "default", "dev", "uesimtun0"], check=False)
+    #     logging.info("uesimtun0 default route deleted")
+    # except Exception as e:
+    #     logging.error(f"{str(e)}")
+    
+    # 2. Add ens33
+    try:
+        subprocess.run(["sudo", "ip", "route", "add", "default", "dev", "ens33"], check=True)
+        logging.info("ens33 default route back")
+    except subprocess.CalledProcessError as e:
+        logging.info(f"{str(e)}")
+        return False
+    
+    # 3. show current situation
+    print()
+    show_default_route()
+    
+    return True
+
+
+def show_default_route():
+    """Show the current default route"""
+    print("-------------------------------------")
+    print("Showing the default route...")
+    print("-------------------------------------")
+    
+    try:
+        # result = subprocess.run(["ip", "route", "show", "default"], 
+        #                       capture_output=True, text=True, check=True)
+        result = subprocess.run(["ip", "route", "show"], 
+                            capture_output=True, text=True, check=True)
+        print("Current Default Route:")
+        print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {str(e)}")
+    
+    return True
+
 def terminate_processes(gnb_pid, ue_pid):
     """Terminate gNB and UE processes"""
     if gnb_pid:

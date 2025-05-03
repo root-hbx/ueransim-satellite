@@ -2,7 +2,8 @@ import time
 import logging
 from cmds.state import save_state, load_state
 from cmds.network import (
-    terminate_processes, start_gnb, start_ue, 
+    terminate_processes, start_gnb, start_ue,
+    modify_default_route, rollback_default_route, 
     wait_for_uesimtun0_ip, ensure_dir
 )
 from cmds.service_helper import stop_wondershaper_service, start_wondershaper_service
@@ -40,6 +41,9 @@ def switch_command(new_corenet="open5gs2", output_file=None):
     # Terminate old processes
     terminate_processes(ori_state['gnb_pid'], ori_state['ue_pid'])
     
+    # rollback default route
+    rollback_default_route()
+    
     termination_time = time.perf_counter()
     
     # Start new connection
@@ -59,6 +63,10 @@ def switch_command(new_corenet="open5gs2", output_file=None):
     
     # Start wondershaper
     start_wondershaper_service()
+    
+    # Modify default route
+    modify_default_route()
+
     service_start = time.perf_counter()
     
     # Update state
