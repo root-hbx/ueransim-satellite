@@ -212,14 +212,14 @@ def add_default_route(interface: str, gateway: str):
         add_default_route("ens33", "172.16.162.2")
     """
     try:
-        if gateway:
+        if interface == 'ens33':
             # Add default route with gateway address
-            # "sudo ip route add default via 172.16.162.2 dev ens33"
+            # "sudo ip route add default via 172.16.16s2.2 dev ens33"
             subprocess.run(["sudo", "ip", "route", "add", "default", "via", gateway, "dev", interface], check=True)
             logging.info(f"Default route added for {interface} via gateway {gateway} (for default date route)")
         else:
             # Add default route without gateway (direct link)
-            # "sudo ip route add default dev ens33"
+            # "sudo ip route add default dev uesimtun0"
             subprocess.run(["sudo", "ip", "route", "add", "default", "dev", interface], check=True)
             logging.info(f"Default route added for {interface} (direct link, for open5gs)")
     except subprocess.CalledProcessError as e:

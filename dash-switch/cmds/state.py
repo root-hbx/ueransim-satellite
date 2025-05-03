@@ -32,6 +32,7 @@ def load_state():
             'interface_ip': None,
             'current_corenet': None,
             'start_time': None,
+            'route_monitor_active': False,
         }
     
     try:
@@ -45,6 +46,7 @@ def load_state():
             'interface_ip': None,
             'current_corenet': None,
             'start_time': None,
+            'route_monitor_active': False,
         }
     show_ps_state()
 
@@ -65,5 +67,6 @@ def show_ps_state():
     print(f"- Interface IP: {state['interface_ip']}")
     print(f"- Current Core Network: {state['current_corenet']}")
     print(f"- Start Time: {state['start_time']}")
+    print(f"- Route Monitor Active: {state['route_monitor_active']}")
     
     

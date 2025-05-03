@@ -24,12 +24,13 @@ def stop_command():
     stop_wondershaper_service()
     
     #TODO(bxhu): Remove uesimtun0 default route
-    del_default_route()
+    del_default_route("uesimtun0", None)
     
     # Terminate processes
     terminate_processes(state['gnb_pid'], state['ue_pid'])
     time.sleep(1)
     
+    # Stop route monitor if active
     if state.get('route_monitor_active', False):
         stop_route_monitor(state.get('stop_event'))
 
