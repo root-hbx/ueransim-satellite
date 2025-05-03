@@ -42,7 +42,7 @@ def switch_command(new_corenet="open5gs2", output_file=None):
     terminate_processes(ori_state['gnb_pid'], ori_state['ue_pid'])
     
     # rollback default route
-    rollback_default_route()
+    # rollback_default_route()
     
     termination_time = time.perf_counter()
     
@@ -65,7 +65,7 @@ def switch_command(new_corenet="open5gs2", output_file=None):
     start_wondershaper_service()
     
     # Modify default route
-    modify_default_route()
+    # modify_default_route()
 
     service_start = time.perf_counter()
     
