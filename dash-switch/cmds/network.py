@@ -161,6 +161,7 @@ def add_default_route(interface: str, gateway: str):
     show_default_route()
     return True
     
+
 def del_default_route():
     """Delete the default route"""
     try:
@@ -172,7 +173,6 @@ def del_default_route():
     
     show_default_route()
     return True
-
 
 
 def show_default_route():
