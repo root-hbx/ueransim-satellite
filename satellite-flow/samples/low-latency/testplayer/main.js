@@ -82,6 +82,7 @@ App.prototype._load = function () {
 }
 
 App.prototype._applyParameters = function () {
+    // TODO(bxhu): add buffer management
 
     if (!this.player) {
         return;
@@ -89,8 +90,70 @@ App.prototype._applyParameters = function () {
 
     var settings = this._getCurrentSettings();
 
+    // def latency for buffer and top quality
+    const targetLatency = parseFloat(document.getElementById('target-latency').value);
+    const bufferDefault = Math.min(targetLatency * 0.5, 0.5); 
+    const topQuality = Math.min(targetLatency * 0.8, 0.5);    
+    const topQualityLongForm = Math.min(targetLatency * 1.2, 0.5);
+    const longFormThreshold = 30 * 60;
+
+    console.log('bufferDefault:', bufferDefault);
+    console.log('topQuality:', topQuality);
+    console.log('topQualityLongForm:', topQualityLongForm);
+    console.log('longFormThreshold:', longFormThreshold);
+
+    // by copilot
+    // this.player.updateSettings({
+    //     streaming: {
+    //         buffer: {
+    //             bufferTimeDefault: bufferDefault,
+    //             bufferTimeAtTopQuality: topQuality,
+    //             bufferTimeAtTopQualityLongForm: topQualityLongForm,
+    //             longFormContentDurationThreshold: longFormThreshold,
+    //         },
+    //         // 低延迟特定设置
+    //         lowLatencyEnabled: true,
+    //         // 在静态缓冲区情况下，设置低延迟场景最小和最大缓冲区
+    //         stallThreshold: 0.3,
+    //         liveCatchup: {
+    //             minDrift: 0.05,
+    //             maxDrift: parseFloat(document.getElementById('max-drift').value),
+    //             playbackRate: {
+    //                 min: parseFloat(document.getElementById('min-catchup-playback-rate').value),
+    //                 max: parseFloat(document.getElementById('max-catchup-playback-rate').value)
+    //             }
+    //         },
+    //         // ABR (自适应比特率) 对缓冲区的影响
+    //         abr: {
+    //             // 确保缓冲足够时再上调码率
+    //             bandwidthSafetyFactor: 0.8,
+    //             // 当缓冲区低于此值时降低码率
+    //             dropFramesBufferLimit: bufferDefault * 0.3
+    //         }
+    //     }
+    // });
+
     this.player.updateSettings({
         streaming: {
+            buffer: {
+                bufferTimeDefault: bufferDefault,
+                bufferTimeAtTopQuality: topQuality,
+                bufferTimeAtTopQualityLongForm: topQualityLongForm,
+                longFormContentDurationThreshold: longFormThreshold,
+            },
+            // TODO(bxhu): Not Sure, TBD
+            // ---------------------------
+            lowLatencyEnabled: true,
+            stallThreshold: 0.3,
+            liveCatchup: {
+                minDrift: 0.05,
+                maxDrift: parseFloat(document.getElementById('max-drift').value),
+                playbackRate: {
+                    min: parseFloat(document.getElementById('min-catchup-playback-rate').value),
+                    max: parseFloat(document.getElementById('max-catchup-playback-rate').value)
+                }
+            },
+            // ---------------------------
             delay: {
                 liveDelay: settings.targetLatency
             },
