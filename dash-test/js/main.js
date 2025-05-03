@@ -1,7 +1,7 @@
 (function() {
     function initializePlayer() {
         // url: From CDN Server to Get Video
-        var url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
+        var url = "https://cmafref.akamaized.net/cmaf/live-ull/2006350/akambr/out.mpd";
         var videoElement = document.querySelector('#videoPlayer');
         var player = dashjs.MediaPlayer().create();
 
@@ -10,13 +10,13 @@
             streaming: {
                 buffer: {
                     // Buffer Prefetch Settings
-                    bufferTimeAtTopQuality: 12,
-                    bufferTimeAtTopQualityLongForm: 12,
-                    bufferTimeDefault: 12,
-                    longFormContentDurationThreshold: 600,
+                    bufferTimeAtTopQuality: 10,
+                    bufferTimeAtTopQualityLongForm: 10,
+                    bufferTimeDefault: 10,
+                    longFormContentDurationThreshold: 60,
                     // Buffer Backward Settings
-                    bufferPruningInterval: 1,
-                    bufferToKeep: 60,
+                    bufferPruningInterval: 0.1,
+                    bufferToKeep: 0.5,
                 }
             }
         });

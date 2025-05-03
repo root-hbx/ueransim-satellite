@@ -2561,7 +2561,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             setLatencyAttributes();
 
             // TODO(bxhu): buffer management settings, here to avoid overriding
-            angular.element(document.body).scope().manualSetBuffer(12, 12, 12, 600);
+            angular.element(document.body).scope().manualSetBuffer(0.5, 0.5, 0.5, 60);
 
             setAbrRules();
             setAdditionalPlaybackOptions();
