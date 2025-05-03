@@ -51,7 +51,7 @@ def switch_command(new_corenet="open5gs2", output_file=None):
     ue_config_file = f"config/{new_corenet}-ue.yaml"
     
     #TODO(bxhu): Remove uesimtun0 default route
-    del_default_route()
+    del_default_route("uesimtun0", None)
     
     # Start gNB and UE for new connection
     gnb_pid = start_gnb(config_file)
@@ -82,6 +82,7 @@ def switch_command(new_corenet="open5gs2", output_file=None):
         'interface_ip': interface_ip,
         'current_corenet': new_corenet,
         'start_time': original_start_time,  # Keep original start time for total elapsed time
+        'route_monitor_active': True,
     }
     save_state(updated_state)
     
