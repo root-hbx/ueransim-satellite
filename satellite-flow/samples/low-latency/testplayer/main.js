@@ -143,8 +143,6 @@ App.prototype._applyParameters = function () {
             },
             // TODO(bxhu): Not Sure, TBD
             // ---------------------------
-            lowLatencyEnabled: true,
-            stallThreshold: 0.3,
             liveCatchup: {
                 minDrift: 0.05,
                 maxDrift: parseFloat(document.getElementById('max-drift').value),
