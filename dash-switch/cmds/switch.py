@@ -3,7 +3,7 @@ import logging
 from cmds.state import save_state, load_state
 from cmds.network import (
     terminate_processes, start_gnb, start_ue,
-    modify_default_route, rollback_default_route, 
+    add_default_route, del_default_route,
     wait_for_uesimtun0_ip, ensure_dir
 )
 from cmds.service_helper import stop_wondershaper_service, start_wondershaper_service
@@ -50,6 +50,9 @@ def switch_command(new_corenet="open5gs2", output_file=None):
     config_file = f"config/{new_corenet}-gnb.yaml"
     ue_config_file = f"config/{new_corenet}-ue.yaml"
     
+    #TODO(bxhu): Remove uesimtun0 default route
+    del_default_route()
+    
     # Start gNB and UE for new connection
     gnb_pid = start_gnb(config_file)
     ue_pid = start_ue(ue_config_file)
@@ -60,6 +63,9 @@ def switch_command(new_corenet="open5gs2", output_file=None):
     except Exception as e:
         logging.error(f"Failed to get uesimtun0 IP: {e}")
         return False
+    
+    #TODO(bxhu): Add uesimtun0 IP to default route
+    add_default_route("uesimtun0", None)
     
     # Start wondershaper
     start_wondershaper_service()

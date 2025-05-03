@@ -2,7 +2,11 @@ import time
 import logging
 import os
 from cmds.state import load_state, clear_state 
-from cmds.network import terminate_processes, rollback_default_route
+from cmds.network import (
+    terminate_processes,
+    add_default_route,
+    del_default_route,
+)
 from cmds.service_helper import stop_wondershaper_service
 
 
@@ -18,16 +22,20 @@ def stop_command():
     # Stop wondershaper service
     stop_wondershaper_service()
     
+    #TODO(bxhu): Remove uesimtun0 default route
+    del_default_route()
+    
     # Terminate processes
     terminate_processes(state['gnb_pid'], state['ue_pid'])
     
-    # Rollback default route
-    rollback_default_route()
     time.sleep(1)
     
     # Clear state
     clear_state()
     
+    #TODO(bxhu): Add ens33 default route
+    add_default_route("ens33", "172.16.162.2")
+
     logging.info("Connection stopped successfully")
     return True
 

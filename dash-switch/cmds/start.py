@@ -5,7 +5,8 @@ from cmds.state import ROOT_DIR, save_state, load_state
 from cmds.network import (
     start_gnb, start_ue,
     wait_for_uesimtun0_ip,
-    modify_default_route,
+    add_default_route,
+    del_default_route,
     ensure_dir
 )
 from cmds.service_helper import start_wondershaper_service
@@ -29,6 +30,9 @@ def start_command(corenet="open5gs1", output_file=None):
     
     # Ensure output directory exists
     ensure_dir(output_file)
+    
+    #TODO(bxhu): Remove ens33 default route
+    del_default_route()
     
     # Record start time
     start_time = time.perf_counter()
@@ -61,9 +65,10 @@ def start_command(corenet="open5gs1", output_file=None):
         from cmds.network import terminate_processes
         terminate_processes(gnb_pid, ue_pid)
         return False
-    
-    # Modify default route
-    modify_default_route()
+
+    #TODO(bxhu): Add uesimtun0 IP to default route
+    add_default_route("uesimtun0", None)
+
     # Start wondershaper
     start_wondershaper_service()
     service_start = time.perf_counter()

@@ -65,74 +65,114 @@ def wait_for_uesimtun0_ip(max_attempts=300, delay=0.1):
     raise Exception("Failed to get IP address for uesimtun0")
 
 
-def modify_default_route():
+# def modify_default_route():
+#     """
+#     Modify the default route to use uesimtun0 instead of ens33.
+#     1. Delete default route for ens33
+#     2. Add uesimtun0 as the default route
+#     3. Showcase current situation
+#     """
+    
+#     print("==========================================")
+#     print("Modifying the default route to ueransim...")
+#     print("==========================================")
+    
+#     # 0. Release DHCP lease to prevent auto-renewal
+#     # Do not use "dhclient -r" as it may cause issues with DNS
+#     # try:
+#     #     subprocess.run(["sudo", "systemctl", "stop", "NetworkManager"], check=False)
+#     #     logging.info("Stopped NetworkManager to prevent route updates")
+#     # except Exception as e:
+#     #     logging.error(f"Error releasing DHCP lease: {str(e)}")
+    
+#     # 1. Del ens33
+#     try:
+#         subprocess.run(["sudo", "ip", "route", "del", "default"], check=False)
+#         logging.info("All default routes deleted")
+#     except Exception as e:
+#         logging.error(f"Error deleting routes: {str(e)}")
+    
+#     # 2. Add uesimtun0
+#     try:
+#         subprocess.run(["sudo", "ip", "route", "add", "default", "dev", "uesimtun0"], check=True)
+#         logging.info("uesimtun0 default route added")
+#     except subprocess.CalledProcessError as e:
+#         logging.info(f"{str(e)}")
+#         return False
+    
+#     # 3. show current situation
+#     print()
+#     show_default_route()
+    
+#     return True
+
+
+# def rollback_default_route():
+#     """Rollback the default route to ens33"""
+    
+#     print("==========================================")
+#     print("Rolling back the default route to ens33...")
+#     print("==========================================")
+    
+#     # 1. Delete all default routes (including uesimtun0)
+#     try:
+#         subprocess.run(["sudo", "ip", "route", "del", "default"], check=False)
+#         logging.info("All default routes deleted")
+#     except Exception as e:
+#         logging.error(f"Error deleting routes: {str(e)}")
+    
+#     # 2. Restart DHCP client to get proper configuration
+#     # try:
+#     #     subprocess.run(["sudo", "systemctl", "start", "NetworkManager"], check=False)
+#     #     logging.info("NetworkManager restarted")
+#     #     time.sleep(3)
+#     # except Exception as e:
+#     #     logging.error(f"Error restarting DHCP client: {str(e)}")
+    
+#     # 3. show current situation
+#     print()
+#     show_default_route()
+    
+#     return True
+
+def add_default_route(interface: str, gateway: str):
     """
-    Modify the default route to use uesimtun0 instead of ens33.
-    1. Delete default route for ens33
-    2. Add uesimtun0 as the default route
-    3. Showcase current situation
+    Add a default route for the specified interface
+    
+    Args:
+        interface: Network interface name (e.g., 'ens33', 'uesimtun0')
+        gateway: Gateway/next hop IP address (optional)
     """
-    
-    print("==========================================")
-    print("Modifying the default route to ueransim...")
-    print("==========================================")
-    
-    # 0. Release DHCP lease to prevent auto-renewal
     try:
-        subprocess.run(["sudo", "dhclient", "-r", "ens33"], check=False)
-        logging.info("Released DHCP lease for ens33")
-    except Exception as e:
-        logging.error(f"Error releasing DHCP lease: {str(e)}")
-    
-    # 1. Del ens33
-    try:
-        subprocess.run(["sudo", "ip", "route", "del", "default"], check=False)
-        logging.info("All default routes deleted")
-    except Exception as e:
-        logging.error(f"Error deleting routes: {str(e)}")
-    
-    # 2. Add uesimtun0
-    try:
-        subprocess.run(["sudo", "ip", "route", "add", "default", "dev", "uesimtun0"], check=True)
-        logging.info("uesimtun0 default route added")
+        if gateway:
+            # Add default route with gateway address
+            # "sudo ip route add default via 172.16.162.2 dev ens33"
+            subprocess.run(["sudo", "ip", "route", "add", "default", "via", gateway, "dev", interface], check=True)
+            logging.info(f"Default route added for {interface} via gateway {gateway} (for default date route)")
+        else:
+            # Add default route without gateway (direct link)
+            # "sudo ip route add default dev ens33"
+            subprocess.run(["sudo", "ip", "route", "add", "default", "dev", interface], check=True)
+            logging.info(f"Default route added for {interface} (direct link, for open5gs)")
     except subprocess.CalledProcessError as e:
-        logging.info(f"{str(e)}")
+        logging.error(f"Error adding default route: {str(e)}")
         return False
     
-    # 3. show current situation
-    print()
     show_default_route()
+    return True
     
+def del_default_route():
+    """Delete the default route"""
+    try:
+        subprocess.run(["sudo", "ip", "route", "del", "default"], check=True)
+        logging.info("Default route deleted")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error deleting default route: {str(e)}")
+        return False
+    
+    show_default_route()
     return True
 
-
-def rollback_default_route():
-    """Rollback the default route to ens33"""
-    
-    print("==========================================")
-    print("Rolling back the default route to ens33...")
-    print("==========================================")
-    
-    # 1. Delete all default routes (including uesimtun0)
-    try:
-        subprocess.run(["sudo", "ip", "route", "del", "default"], check=False)
-        logging.info("All default routes deleted")
-    except Exception as e:
-        logging.error(f"Error deleting routes: {str(e)}")
-    
-    # 2. Restart DHCP client to get proper configuration
-    try:
-        subprocess.run(["sudo", "dhclient", "ens33"], check=False)
-        logging.info("DHCP client restarted for ens33")
-        time.sleep(8)
-    except Exception as e:
-        logging.error(f"Error restarting DHCP client: {str(e)}")
-    
-    # 3. show current situation
-    print()
-    show_default_route()
-    
-    return True
 
 
 def show_default_route():
