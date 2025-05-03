@@ -2,7 +2,71 @@ import os
 import subprocess
 import time
 import logging
+import threading
+import re
 from cmds.state import ROOT_DIR
+
+
+def monitor_route_interface(interface="ens33", stop_event=None):
+    """
+    Monitor routing table and remove unwanted default routes for specific interface.
+    
+    Args:
+        interface: Network interface to monitor (default: ens33)
+        stop_event: Threading event to signal when monitoring should stop
+    
+    Returns:
+        The monitoring thread object and stop event
+    """
+    if stop_event is None:
+        stop_event = threading.Event()
+    
+    def _monitor_worker():
+        logging.info(f"Starting route monitor for interface {interface}")
+        
+        while not stop_event.is_set():
+            try:
+                result = subprocess.run(["ip", "route", "show", "default"], 
+                                     capture_output=True, text=True, check=True)
+                
+                if "proto dhcp" in result.stdout:
+                    logging.info(f"Detected unwanted DHCP default route")
+                    # TODO(bxhu): Hard Code for Gateway, WIP.
+                    proto = "dhcp"
+                    gateway = "172.16.162.2"
+                    # TODO(bxhu): Delete default route for ens33 with DHCP
+                    subprocess.run(["sudo", "ip", "route", "del", "default", "via", gateway, "dev", interface, "proto", proto], check=True)
+            
+            except Exception as e:
+                logging.error(f"Error in route monitor: {e}")
+            
+            time.sleep(1)
+        
+        logging.info(f"Route monitor for {interface} stopped")
+    
+    monitor_thread = threading.Thread(target=_monitor_worker, daemon=True)
+    monitor_thread.start()
+    
+    return monitor_thread, stop_event
+
+
+def start_route_monitor():
+    """
+    Start monitoring and removing unwanted default routes.
+    Returns a stop event that can be used to stop monitoring.
+    """
+    stop_event = threading.Event()
+    thread, _ = monitor_route_interface(stop_event=stop_event)
+    return thread, stop_event
+
+
+def stop_route_monitor(stop_event):
+    """
+    Stop the route monitoring thread.
+    """
+    if stop_event:
+        stop_event.set()
+        logging.info("Route monitor stop signal sent")
 
 
 def ensure_dir(file_path):
@@ -142,6 +206,10 @@ def add_default_route(interface: str, gateway: str):
     Args:
         interface: Network interface name (e.g., 'ens33', 'uesimtun0')
         gateway: Gateway/next hop IP address (optional)
+    
+    Usecase:
+        add_default_route("uesimtun0", None)
+        add_default_route("ens33", "172.16.162.2")
     """
     try:
         if gateway:
@@ -162,11 +230,48 @@ def add_default_route(interface: str, gateway: str):
     return True
     
 
-def del_default_route():
-    """Delete the default route"""
+def del_default_route(interface: str, proto: str):
+    """
+    Delete the default route
+    
+    Args:
+        interface: Network interface name (e.g., 'ens33', 'uesimtun0')
+        proto: Routing protocol (e.g., 'dhcp')
+    
+    Valid combinations:
+        - interface='uesimtun0', proto=None
+        - interface='ens33', proto=None
+        - interface='ens33', proto='dhcp'
+    """
+    
+    valid_combinations = [
+        ('uesimtun0', None),
+        ('ens33', None),
+        ('ens33', 'dhcp')
+    ]
+    if (interface, proto) not in valid_combinations:
+        err_msg = f"Invalid combination: interface='{interface}', proto='{proto}'. " \
+                 f"Valid combinations are: {valid_combinations}"
+        logging.error(err_msg)
+        raise ValueError(err_msg)
+
     try:
-        subprocess.run(["sudo", "ip", "route", "del", "default"], check=True)
-        logging.info("Default route deleted")
+        if interface == 'uesimtun0':
+            # TODO(bxhu): Delete default route for uesimtun0
+            subprocess.run(["sudo", "ip", "route", "del", "default", "dev", "uesimtun0"], check=True)
+            logging.info(f"Default route deleted for {interface}")
+        elif interface == 'ens33':
+            # TODO(bxhu): Hard Code for Gateway, WIP.
+            gateway = "172.16.162.2"
+            if proto == 'dhcp':
+                # TODO(bxhu): Delete default route for ens33 with DHCP
+                subprocess.run(["sudo", "ip", "route", "del", "default", "via", gateway, "dev", interface, "proto", proto], check=True)
+                logging.info(f"Default route deleted for {interface} with proto {proto}")
+            else:
+                # TODO(bxhu): Delete default route for ens33 without DHCP
+                subprocess.run(["sudo", "ip", "route", "del", "default", "dev", "ens33"], check=True)
+                logging.info(f"Default route deleted for {interface} without proto")
+            
     except subprocess.CalledProcessError as e:
         logging.error(f"Error deleting default route: {str(e)}")
         return False

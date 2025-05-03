@@ -6,6 +6,7 @@ from cmds.network import (
     terminate_processes,
     add_default_route,
     del_default_route,
+    stop_route_monitor,
 )
 from cmds.service_helper import stop_wondershaper_service
 
@@ -27,9 +28,11 @@ def stop_command():
     
     # Terminate processes
     terminate_processes(state['gnb_pid'], state['ue_pid'])
-    
     time.sleep(1)
     
+    if state.get('route_monitor_active', False):
+        stop_route_monitor(state.get('stop_event'))
+
     # Clear state
     clear_state()
     

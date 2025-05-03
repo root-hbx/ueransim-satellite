@@ -7,7 +7,8 @@ from cmds.network import (
     wait_for_uesimtun0_ip,
     add_default_route,
     del_default_route,
-    ensure_dir
+    ensure_dir,
+    start_route_monitor,
 )
 from cmds.service_helper import start_wondershaper_service
 
@@ -33,6 +34,7 @@ def start_command(corenet="open5gs1", output_file=None):
     
     #TODO(bxhu): Remove ens33 default route
     del_default_route()
+    monitor_thread, stop_event = start_route_monitor()
     
     # Record start time
     start_time = time.perf_counter()
@@ -80,6 +82,7 @@ def start_command(corenet="open5gs1", output_file=None):
         'interface_ip': interface_ip,
         'current_corenet': corenet,
         'start_time': start_time,
+        'route_monitor_active': True,
     }
     save_state(state)
     
