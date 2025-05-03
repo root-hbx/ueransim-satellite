@@ -79,11 +79,10 @@ def modify_default_route():
     
     # 1. Del ens33
     try:
-        subprocess.run(["sudo", "pkill", "dhclient"], check=False)
-        subprocess.run(["sudo", "ip", "route", "del", "default", "dev", "ens33"], check=False)
-        logging.info("ens33 default route deleted")
+        subprocess.run(["sudo", "ip", "route", "del", "default"], check=False)
+        logging.info("All default routes deleted")
     except Exception as e:
-        logging.error(f"{str(e)}")
+        logging.error(f"Error deleting routes: {str(e)}")
     
     # 2. Add uesimtun0
     try:
@@ -107,19 +106,30 @@ def rollback_default_route():
     print("Rolling back the default route to ens33...")
     print("==========================================")
     
-    # 1. Del uesimtun0
-    # try:
-    #     subprocess.run(["sudo", "ip", "route", "del", "default", "dev", "uesimtun0"], check=False)
-    #     logging.info("uesimtun0 default route deleted")
-    # except Exception as e:
-    #     logging.error(f"{str(e)}")
-    
-    # 2. Add ens33
+    # 1. Delete all default routes (including uesimtun0)
     try:
-        subprocess.run(["sudo", "ip", "route", "add", "default", "dev", "ens33"], check=True)
-        logging.info("ens33 default route back")
+        subprocess.run(["sudo", "ip", "route", "del", "default"], check=False)
+        logging.info("All default routes deleted")
+    except Exception as e:
+        logging.error(f"Error deleting routes: {str(e)}")
+    
+    # 2. Restore original default route with gateway
+    try:
+        """
+        (.venv) ueransim@ueransim:~/ueransim-satellite$ ip route show default
+        default via 172.16.162.2 dev ens33 proto dhcp src 172.16.162.134 metric 100 
+        """
+        subprocess.run([
+            "sudo", "ip", "route", "add", 
+            "default", "via", "172.16.162.2", 
+            "dev", "ens33", 
+            "proto", "dhcp", 
+            "src", "172.16.162.134", 
+            "metric", "100"
+        ], check=True)
+        logging.info("Original default route with gateway restored")
     except subprocess.CalledProcessError as e:
-        logging.info(f"{str(e)}")
+        logging.error(f"Error adding route: {str(e)}")
         return False
     
     # 3. show current situation
