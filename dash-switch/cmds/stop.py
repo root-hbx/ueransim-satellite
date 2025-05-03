@@ -1,7 +1,8 @@
 import time
 import logging
 import os
-from cmds.state import load_state, clear_state 
+from cmds.state import load_state, clear_state
+from cmds.state import UESIMTUN0_GATEWAY_IP 
 from cmds.network import (
     terminate_processes,
     add_default_route,
@@ -38,7 +39,7 @@ def stop_command():
     clear_state()
     
     #TODO(bxhu): Add ens33 default route
-    add_default_route("ens33", "172.16.162.2")
+    add_default_route("ens33", UESIMTUN0_GATEWAY_IP)
 
     logging.info("Connection stopped successfully")
     return True

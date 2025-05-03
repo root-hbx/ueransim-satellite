@@ -4,7 +4,7 @@ import time
 import logging
 import threading
 import re
-from cmds.state import ROOT_DIR
+from cmds.state import ROOT_DIR, UESIMTUN0_GATEWAY_IP
 
 
 def monitor_route_interface(interface="ens33", stop_event=None):
@@ -33,7 +33,7 @@ def monitor_route_interface(interface="ens33", stop_event=None):
                     logging.info(f"Detected unwanted DHCP default route")
                     # TODO(bxhu): Hard Code for Gateway, WIP.
                     proto = "dhcp"
-                    gateway = "172.16.162.2"
+                    gateway = UESIMTUN0_GATEWAY_IP
                     # TODO(bxhu): Delete default route for ens33 with DHCP
                     subprocess.run(["sudo", "ip", "route", "del", "default", "via", gateway, "dev", interface, "proto", proto], check=True)
             
@@ -214,7 +214,7 @@ def add_default_route(interface: str, gateway: str):
     try:
         if interface == 'ens33':
             # Add default route with gateway address
-            # "sudo ip route add default via 172.16.16s2.2 dev ens33"
+            # "sudo ip route add default via 172.16.162.2 dev ens33"
             subprocess.run(["sudo", "ip", "route", "add", "default", "via", gateway, "dev", interface], check=True)
             logging.info(f"Default route added for {interface} via gateway {gateway} (for default date route)")
         else:
@@ -262,7 +262,7 @@ def del_default_route(interface: str, proto: str):
             logging.info(f"Default route deleted for {interface}")
         elif interface == 'ens33':
             # TODO(bxhu): Hard Code for Gateway, WIP.
-            gateway = "172.16.162.2"
+            gateway = UESIMTUN0_GATEWAY_IP
             if proto == 'dhcp':
                 # TODO(bxhu): Delete default route for ens33 with DHCP
                 subprocess.run(["sudo", "ip", "route", "del", "default", "via", gateway, "dev", interface, "proto", proto], check=True)

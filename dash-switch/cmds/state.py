@@ -6,6 +6,7 @@ import logging
 # Global constants
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 FREE5GC_IP = "172.16.162.135"
+UESIMTUN0_GATEWAY_IP = "172.16.162.2"
 BW_MAX = 200  # Mbps
 
 # State file for persisting running processes
