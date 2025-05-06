@@ -34,6 +34,7 @@ def start_command(corenet="open5gs1", output_file=None):
     
     #TODO(bxhu): Remove ens33 default route
     del_default_route("ens33", None)
+    del_default_route("ens33", None) # double, incase sys's auto add
     # Start route monitor
     monitor_thread, stop_event = start_route_monitor()
     
