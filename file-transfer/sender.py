@@ -2,8 +2,11 @@ import paramiko
 import os
 import sys
 import getpass
+import time
+import tqdm
 
-# prerequisites: "pip install paramiko"
+
+# prerequisites: "pip install paramiko tqdm"
 def scp_download(service_name, service_ip, remote_path, local_path="."):
     """
     Fetch from a remote server using SCP
@@ -14,6 +17,7 @@ def scp_download(service_name, service_ip, remote_path, local_path="."):
         remote_path: remote file path to download
         local_path: local store path
     """
+    local_file_path = None
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -37,25 +41,54 @@ def scp_download(service_name, service_ip, remote_path, local_path="."):
         
         print(f"Downloading: {remote_path} -> {local_file_path}")
 
-        # Downloading...
-        sftp.get(remote_path, local_file_path)
+        file_size = sftp.stat(remote_path).st_size # B
+        start_time = time.perf_counter()
+
+        # Virtual progress bar using tqdm
+        with tqdm.tqdm(total=file_size, unit='B', unit_scale=True, desc=remote_file_name) as pbar:
+            def callback(bytes_transferred, total_bytes):
+                pbar.update(bytes_transferred - pbar.n)
+        
+            sftp.get(remote_path, local_file_path, callback=callback)
         
         # End
+        end_time = time.perf_counter()
         sftp.close()
         ssh.close()
         
+        # Statistics
+        download_time = end_time - start_time
+        
         print(f"File Downloaded to: {local_file_path}")
-        print("Download completed successfully.")
+        print(f"Download completed successfully.")
+        print("=============================================")
+        print(f"[Statistics]")
+        print(f"File transfer time: {download_time:.2f} seconds")
+        
+        speed = file_size / download_time / 1024 / 1024  # MBps
+        print(f"Average download speed: {speed:.2f} MBps")
+        
         return True
     
     except Exception as e:
         print(f"Error: {str(e)}")
+        if local_file_path and os.path.exists(local_file_path):
+            try:
+                if os.path.getsize(local_file_path) == 0:
+                    os.remove(local_file_path)
+                    print(f"Empty File Cleaned: {local_file_path}")
+                else:
+                    print(f"File {local_file_path} not empty, reserve it")
+            except Exception as cleanup_error:
+                print(f"Error when cleaning: {str(cleanup_error)}")
+
         return False
+
 
 def main():
     service_name = "free5gc"
     service_ip = "172.16.162.135"
-    remote_path = "~/bxhu.txt"
+    remote_path = "/home/free5gc/QQ_3.2.15_250110_amd64_01.deb" # absolute path on remote server
     local_path = "./outputs"
 
     scp_download(service_name, service_ip, remote_path, local_path)
