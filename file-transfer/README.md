@@ -1,12 +1,7 @@
-# File Transfer based on SCP
+# File Transfer based on curl <-> CDN
 
 ```
-scp free5gc@172.16.162.135:~/bxhu.txt .
+curl --interface uesimtun0 -o lecture12_SupML_buluc24.pdf https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev/lecture12_SupML_buluc24.pdf
 ```
 
-<!-- TODO(bxhu) -->
-
-```
-need to specify the UESIMTUN0 port
-```
 
