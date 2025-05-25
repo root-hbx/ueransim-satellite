@@ -121,7 +121,7 @@ def fetch_file(
         
         curl_cmd = [
             "curl",
-            # "--interface", net_interface, #TODO(bxhu): linux works, macOS not
+            "--interface", net_interface, #TODO(bxhu): linux works, macOS not
             "-C", "-",  # Resume download if possible
             "-o", file_name,
             "-L", # Follow redirects
@@ -219,9 +219,9 @@ Average speed: {speed_mbps:.2f} MBps
     finally:
         signal.signal(signal.SIGINT, original_handler)
 
-# Module Test
-if __name__ == "__main__":
-    net_if = "en0"
-    output_file = "./lecture12_SupML_buluc24.pdf"
-    test_url = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev/lecture12_SupML_buluc24.pdf"
-    result = fetch_file(net_if, output_file, test_url)
+# # Module Test
+# if __name__ == "__main__":
+#     net_if = "en0"
+#     output_file = "./lecture12_SupML_buluc24.pdf"
+#     test_url = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev/lecture12_SupML_buluc24.pdf"
+#     result = fetch_file(net_if, output_file, test_url)
