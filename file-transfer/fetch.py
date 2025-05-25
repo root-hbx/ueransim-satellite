@@ -44,7 +44,10 @@ def _create_signal_handler(
 Download interrupted by user!
 Partial download statistics:
 File name: {file_name_ref[0]}
-File size (partial): {file_size_mb:.2f} MB
+
+Total size fetched: {cur_file_size_bytes / (1024 * 1024):.2f} MB
+Size downloaded in this period: {file_size_mb:.2f} MB
+
 Time elapsed: {duration:.2f} seconds
 Average speed: {speed_mbps:.2f} MBps
 """
@@ -53,6 +56,7 @@ Average speed: {speed_mbps:.2f} MBps
                     log_file_handle.write("\n=== DOWNLOAD INTERRUPTED ===\n")
                     log_file_handle.write(stats_info)
                     log_file_handle.write(f"Interrupted at: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+                    log_file_handle.write("\n\n")
 
             except Exception as e:
                 error_msg = f"Error calculating statistics for partial download: {e}"
@@ -85,7 +89,12 @@ def fetch_file(
     process = None
     # download_interrupted = False
     ensure_dir(log_file_path)
-    ori_file_size_bytes = os.path.getsize(file_name)
+    
+    # if not os.path.exists(file_name):
+    #     ori_file_size_bytes = 0
+    # else:
+    #     ori_file_size_bytes = os.path.getsize(file_name)
+    ori_file_size_bytes = 0 if not os.path.exists(file_name) else os.path.getsize(file_name)
 
     # Create references for signal handler
     process_ref = [None]
@@ -178,7 +187,10 @@ Download completed successfully!
 Final download statistics:
 File name: {file_name}
 File location: {os.path.abspath(file_name)}
-File size: {file_size_mb:.2f} MB
+
+Total size fetched: {cur_file_size_bytes / (1024 * 1024):.2f} MB
+Size downloaded in this period: {file_size_mb:.2f} MB
+
 Time elapsed: {duration:.2f} seconds
 Average speed: {speed_mbps:.2f} MBps
 """
@@ -207,9 +219,9 @@ Average speed: {speed_mbps:.2f} MBps
     finally:
         signal.signal(signal.SIGINT, original_handler)
 
-# # Module Test
-# if __name__ == "__main__":
-#     net_if = "en0"
-#     output_file = "./lecture12_SupML_buluc24.pdf"
-#     test_url = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev/lecture12_SupML_buluc24.pdf"
-#     result = fetch_file(net_if, output_file, test_url)
+# Module Test
+if __name__ == "__main__":
+    net_if = "en0"
+    output_file = "./lecture12_SupML_buluc24.pdf"
+    test_url = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev/lecture12_SupML_buluc24.pdf"
+    result = fetch_file(net_if, output_file, test_url)
