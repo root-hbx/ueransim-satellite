@@ -11,6 +11,7 @@ def _create_signal_handler(
     file_name_ref,
     log_file_path_ref,
     download_interrupted_ref,
+    ori_file_size_bytes_ref,
 ):
     """
     Create a signal handler for download interruption.
@@ -21,6 +22,7 @@ def _create_signal_handler(
         file_name_ref: Ref to file name
         log_file_path_ref: Ref to log file path
         download_interrupted_ref: Ref to download interrupted flag
+        ori_file_size_bytes_ref: Ref to original file size in bytes
     """
     def signal_handler(sig, frame):
         if process_ref[0] and process_ref[0].poll() is None:
@@ -33,8 +35,9 @@ def _create_signal_handler(
             end_time = time.perf_counter()
             duration = end_time - start_time_ref[0]
             try:
-                file_size_bytes = os.path.getsize(file_name_ref[0])
-                file_size_mb = file_size_bytes / (1024 * 1024)
+                cur_file_size_bytes = os.path.getsize(file_name_ref[0])
+                downloaded_bytes = cur_file_size_bytes - ori_file_size_bytes_ref[0]
+                file_size_mb = downloaded_bytes / (1024 * 1024)
                 speed_mbps = (file_size_mb / duration) if duration > 0 else 0
                 
                 stats_info = f"""
@@ -82,6 +85,7 @@ def fetch_file(
     process = None
     # download_interrupted = False
     ensure_dir(log_file_path)
+    ori_file_size_bytes = os.path.getsize(file_name)
 
     # Create references for signal handler
     process_ref = [None]
@@ -89,10 +93,12 @@ def fetch_file(
     file_name_ref = [file_name]
     log_file_path_ref = [log_file_path]
     download_interrupted_ref = [False]
+    ori_file_size_bytes_ref = [ori_file_size_bytes]
 
     signal_handler = _create_signal_handler(
         process_ref, start_time_ref, file_name_ref, 
-        log_file_path_ref, download_interrupted_ref
+        log_file_path_ref, download_interrupted_ref,
+        ori_file_size_bytes_ref
     )
 
     original_handler = signal.getsignal(signal.SIGINT)
@@ -160,8 +166,9 @@ def fetch_file(
         end_time = time.perf_counter()
         duration = end_time - start_time
 
-        file_size_bytes = os.path.getsize(file_name)
-        file_size_mb = file_size_bytes / (1024 * 1024)  # MB
+        cur_file_size_bytes = os.path.getsize(file_name)
+        downloaded_bytes = cur_file_size_bytes - ori_file_size_bytes
+        file_size_mb = downloaded_bytes / (1024 * 1024)  # MB
 
         # Calculate download speed
         speed_mbps = (file_size_mb / duration) if duration > 0 else 0 # MBps
