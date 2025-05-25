@@ -52,7 +52,7 @@ def fetch_file(net_interface, file_name, cdn_url):
         # Calculate download speed
         speed_mbps = (file_size_mb / duration) if duration > 0 else 0 # MBps
         
-        print(f"\nDownload completed!")
+        print(f"Download completed!")
         print("Statistics:")
         print(f"File size: {file_size_mb:.2f} MB")
         print(f"Time elapsed: {duration:.2f} seconds")
