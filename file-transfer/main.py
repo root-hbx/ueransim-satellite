@@ -13,31 +13,10 @@ This script should be run on UERANSIM machine
 
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
-FREE5GC_IP = "172.16.162.135"
-TOTAL_TIME = 60
-DIVIDE_TIME = TOTAL_TIME / 2
+CDN_URL = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev"
 BW_MAX = 200 # Mbps
 
 logging.basicConfig(level=logging.INFO)
-
-"""
-Flow:
-  * TCP Flow 1: 
-    * Duration: TOTAL_TIME / 2
-    * Link: open5gs-1
-  * TCP Flow 2:
-    * Duration: TOTAL_TIME / 2
-    * Link: open5gs-2
-Statistics:
-  * Program Runtime: total_time
-  * TCP Total Time: TOTAL_TIME
-  * All Data Generated: total_data = total_time * BW_MAX / 8
-  * All Data Transferred: pkt_size_1 + pkt_size_2
-Experiments Plot:
-  * x: TCP Total Time (`TOTAL_TIME`)
-  * y1: All Data Transferred (`pkt_size_1 + pkt_size_2`)
-  * y2: Link Rate Utilization (`All Data Transferred / All Data Generated`)
-"""
 
 def admin():
     """
