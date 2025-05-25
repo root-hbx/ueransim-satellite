@@ -24,8 +24,8 @@ def fetch_file(net_interface, file_name, cdn_url, log_file_path="./file-x/exp.tx
     def signal_handler(sig, frame):
         nonlocal download_interrupted, process, start_time, file_name
         if process and process.poll() is None:
-            process.terminate()  # terminate the curl process
-        
+            process.terminate()  # terminate curl process
+
         download_interrupted = True
         print("\nDownload interrupted by user!")
         
@@ -38,14 +38,13 @@ def fetch_file(net_interface, file_name, cdn_url, log_file_path="./file-x/exp.tx
                 speed_mbps = (file_size_mb / duration) if duration > 0 else 0
                 
                 stats_info = f"""
-Download interrupted by user!
-Partial download statistics:
-File name: {file_name}
-File size (partial): {file_size_mb:.2f} MB
-Time elapsed: {duration:.2f} seconds
-Average speed: {speed_mbps:.2f} MBps
-"""
-                print(stats_info)
+                Download interrupted by user!
+                Partial download statistics:
+                File name: {file_name}
+                File size (partial): {file_size_mb:.2f} MB
+                Time elapsed: {duration:.2f} seconds
+                Average speed: {speed_mbps:.2f} MBps
+                """
                 
                 with open(log_file_path, 'a', encoding='utf-8') as log_file_handle:
                     log_file_handle.write("\n=== DOWNLOAD INTERRUPTED ===\n")
@@ -82,7 +81,7 @@ Average speed: {speed_mbps:.2f} MBps
             log_file_handle.write(f"Command: {' '.join(curl_cmd)}\n")
             log_file_handle.write(f"Started at: {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
         
-        print("Executing curl command...")
+        # Start the curl process
         process = subprocess.Popen(
             curl_cmd, 
             stdout=subprocess.PIPE,
@@ -107,9 +106,6 @@ Average speed: {speed_mbps:.2f} MBps
 
         if process.returncode != 0:
             error_msg = f"Download failed with error code {process.returncode}"
-            print(error_msg)
-            print(f"Error details have been logged to {log_file_path}")
-            
             with open(log_file_path, 'a', encoding='utf-8') as log_file_handle:
                 log_file_handle.write("\n=== DOWNLOAD FAILED ===\n")
                 log_file_handle.write(f"{error_msg}\n")
@@ -133,41 +129,42 @@ Average speed: {speed_mbps:.2f} MBps
         speed_mbps = (file_size_mb / duration) if duration > 0 else 0 # MBps
 
         success_info = f"""
-Download completed successfully!
-Final download statistics:
-File name: {file_name}
-File location: {os.path.abspath(file_name)}
-File size: {file_size_mb:.2f} MB
-Time elapsed: {duration:.2f} seconds
-Average speed: {speed_mbps:.2f} MBps
-"""
+            Download completed successfully!
+            Final download statistics:
+            File name: {file_name}
+            File location: {os.path.abspath(file_name)}
+            File size: {file_size_mb:.2f} MB
+            Time elapsed: {duration:.2f} seconds
+            Average speed: {speed_mbps:.2f} MBps
+            """
 
         with open(log_file_path, 'a', encoding='utf-8') as log_file_handle:
             log_file_handle.write("\n=== DOWNLOAD COMPLETED SUCCESSFULLY ===\n")
             log_file_handle.write(success_info)
             log_file_handle.write(f"Completed at: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
         return True
 
     except FileNotFoundError:
         error_msg = "Error: The 'curl' command was not found. "
         "Please ensure curl is installed and in your PATH."
-
         with open(log_file_path, 'a', encoding='utf-8') as log_file_handle:
             log_file_handle.write(f"\n=== CURL NOT FOUND ===\n{error_msg}\n")
+        
         return False
     except Exception as e:
         error_msg = f"An unexpected error occurred: {e}"
-        
         with open(log_file_path, 'a', encoding='utf-8') as log_file_handle:
             log_file_handle.write(f"\n=== UNEXPECTED ERROR ===\n{error_msg}\n")
             log_file_handle.write(f"Error occurred at: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
         return False
     finally:
         signal.signal(signal.SIGINT, original_handler)
 
-
-if __name__ == "__main__":
-    net_if = "en0"
-    output_file = "./lecture12_SupML_buluc24.pdf"
-    test_url = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev/lecture12_SupML_buluc24.pdf"
-    result = fetch_file(net_if, output_file, test_url)
+# Module Test
+# if __name__ == "__main__":
+#     net_if = "en0"
+#     output_file = "./lecture12_SupML_buluc24.pdf"
+#     test_url = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev/lecture12_SupML_buluc24.pdf"
+#     result = fetch_file(net_if, output_file, test_url)
