@@ -6,6 +6,7 @@ import logging
 import threading
 from service_helper import start_wondershaper_service, stop_wondershaper_service
 from network_sim import wait_for_uesimtun0_ip, iperf_tcp_test, ensure_dir
+from fetch import fetch_file
 
 """
 This script should be run on UERANSIM machine
@@ -14,6 +15,8 @@ This script should be run on UERANSIM machine
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 CDN_URL = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev"
+FILE_NAME = "test.pdf"
+STAGE_1_DURATION = 30 # seconds
 BW_MAX = 200 # Mbps
 
 logging.basicConfig(level=logging.INFO)
@@ -92,8 +95,12 @@ def start_ue(
 
 def run_scenario():
     """Constructing the scenario with time-controlled connections"""
-    output_file = f"./test/continuous_tcp_traffic_{TOTAL_TIME}.txt"
-    ensure_dir(output_file)
+    output_file_1 = f"./file-x/exp_stage1_{STAGE_1_DURATION}.txt"
+    output_file_2 = "./file-x/exp_stage2.txt"
+    output_file_stat = "./file-x/exp_stat.txt"
+    ensure_dir(output_file_1)
+    ensure_dir(output_file_2)
+    ensure_dir(output_file_stat)
 
     gnb1_process = None
     ue1_process = None
@@ -102,10 +109,8 @@ def run_scenario():
 
     # Record start time for logging as timestamp 0
     start_exp = time.perf_counter()
-    with open(output_file, "a") as f:
+    with open(output_file_1, "a") as f:
         f.write("[t=0] Connecting to open5gs-1...\n")
-        f.write(f"[t=0] Starting continuous TCP background traffic {TOTAL_TIME}s Total, "
-                f"{DIVIDE_TIME - 0}s for Stage-1, {TOTAL_TIME - DIVIDE_TIME}s for Stage-2...\n")
 
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
@@ -117,15 +122,12 @@ def run_scenario():
     service_start_1 = time.perf_counter()
 
     # Phase 1: Use interface1 for the first part
-    phase_1_duration = DIVIDE_TIME - 0
-    iperf_tcp_test(
-        server_ip=FREE5GC_IP,
-        interface_ip=interface1_ip,
-        port=5201,
-        output_file=output_file,
-        corenet_name="open5gs-1",
-        gen_time=phase_1_duration,
-        interval=1,
+    fetch_file(
+        net_interface="uesimtun0",
+        file_name=FILE_NAME,
+        cdn_url=CDN_URL,
+        log_file_path=output_file_1,
+        timeout=STAGE_1_DURATION
     )
 
     tcp_end_1 = time.perf_counter() # theoretically, tcp_end_1 = service_start_1 + phase_1_duration
@@ -140,7 +142,7 @@ def run_scenario():
     gnb1_process = None
     ue1_process = None
 
-    with open(output_file, "a") as f:
+    with open(output_file_1, "a") as f:
         f.write("\n[Phase 1]\n")
         f.write(f"[t = {built1_probe - start_exp}] TCP Traffic Started from {interface1_ip}...\n")
         f.write(f"[t = {service_start_1 - start_exp}] WonderShaper Service Started for Stage 1...\n")
@@ -156,20 +158,17 @@ def run_scenario():
     service_start_2 = time.perf_counter()
 
     # Phase 2: Use interface2 for the second part
-    phase_2_duration = TOTAL_TIME - DIVIDE_TIME
-    iperf_tcp_test(
-        server_ip=FREE5GC_IP,
-        interface_ip=interface2_ip,
-        port=5201,
-        output_file=output_file,
-        corenet_name="open5gs-2",
-        gen_time=phase_2_duration,
-        interval=1,
+    fetch_file(
+        net_interface="uesimtun0",
+        file_name=FILE_NAME,
+        cdn_url=CDN_URL,
+        log_file_path=output_file_2,
+        timeout=None
     )
 
     tcp_end_2 = time.perf_counter() # theoretically, tcp_end_2 = service_start_2 + phase_2_duration
 
-    with open(output_file, "a") as f:
+    with open(output_file_2, "a") as f:
         f.write("\n[Phase 2]\n")
         f.write(f"[t = {built2_probe - start_exp}] TCP Traffic Switching from {interface1_ip} to {interface2_ip}...\n")
         f.write(f"[t = {service_start_2 - start_exp}] WonderShaper Service Started for Stage 2...\n")
@@ -182,7 +181,7 @@ def run_scenario():
     gnb2_process = None
     ue2_process = None
 
-    logging.info(f"Results saved to {output_file}")
+    logging.info(f"Results saved to {output_file_1} and {output_file_2}")
     logging.info("Scenario completed successfully")
 
     total_time = tcp_end_2 - service_start_1
@@ -190,7 +189,7 @@ def run_scenario():
     service_delay_2 = service_start_2 - built2_probe
     all_data_gen = total_time * BW_MAX / 8 # MB
 
-    with open(output_file, "a") as f:
+    with open(output_file_stat, "a") as f:
         f.write("\nStatistics:\n")
         f.write(f"All Data Generated: {(all_data_gen):.4f} MB\n") # need as part of "y2"
         f.write(f"Total TCP Time: {TOTAL_TIME:.4f} seconds\n") # need as "x"

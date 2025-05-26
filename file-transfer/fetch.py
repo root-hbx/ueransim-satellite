@@ -1,5 +1,6 @@
 import os
 import subprocess
+import threading
 import time
 import sys
 import signal
@@ -73,7 +74,8 @@ def fetch_file(
     net_interface, 
     file_name, 
     cdn_url, 
-    log_file_path="./file-x/exp.txt"
+    log_file_path="./file-x/exp.txt",
+    timeout=None
 ):
     """
     Download a file from specified URL using a specific network interface
@@ -87,7 +89,6 @@ def fetch_file(
     """
     start_time = None
     process = None
-    # download_interrupted = False
     ensure_dir(log_file_path)
     ori_file_size_bytes = 0 if not os.path.exists(file_name) else os.path.getsize(file_name)
 
@@ -98,6 +99,13 @@ def fetch_file(
     log_file_path_ref = [log_file_path]
     download_interrupted_ref = [False]
     ori_file_size_bytes_ref = [ori_file_size_bytes]
+
+    timeout_timer = None
+    def timeout_handler():
+        if process_ref[0] and process_ref[0].poll() is None:
+            process_ref[0].terminate()
+        download_interrupted_ref[0] = True
+        print(f"\nDownload timed out after {timeout} seconds!")
 
     signal_handler = _create_signal_handler(
         process_ref, start_time_ref, file_name_ref, 
@@ -111,8 +119,15 @@ def fetch_file(
     try:
         print(f"Starting download from {cdn_url} to {file_name}")
         print(f"Using network interface: {net_interface}")
+        if timeout:
+            print(f"Timeout set to {timeout} seconds")
+
         start_time = time.perf_counter()
         start_time_ref[0] = start_time
+        
+        if timeout:
+            timeout_timer = threading.Timer(timeout, timeout_handler)
+            timeout_timer.start()
         
         curl_cmd = [
             "curl",
@@ -127,6 +142,9 @@ def fetch_file(
         with open(log_file_path, 'a', encoding='utf-8') as log_file_handle:
             log_file_handle.write(f"Command: {' '.join(curl_cmd)}\n")
             log_file_handle.write(f"Started at: {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+            if timeout:
+                log_file_handle.write(f"Timeout: {timeout} seconds\n")
+            log_file_handle.write("\n")
         
         # Start the curl process
         process = subprocess.Popen(
@@ -196,7 +214,6 @@ Average speed: {speed_mbps:.2f} MBps
             log_file_handle.write(f"Completed at: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
         
         return True
-
     except FileNotFoundError:
         error_msg = "Error: The 'curl' command was not found. " \
                    "Please ensure curl is installed and in your PATH."
@@ -212,6 +229,8 @@ Average speed: {speed_mbps:.2f} MBps
         
         return False
     finally:
+        if timeout_timer:
+            timeout_timer.cancel()
         signal.signal(signal.SIGINT, original_handler)
 
 # # Module Test
