@@ -89,11 +89,6 @@ def fetch_file(
     process = None
     # download_interrupted = False
     ensure_dir(log_file_path)
-    
-    # if not os.path.exists(file_name):
-    #     ori_file_size_bytes = 0
-    # else:
-    #     ori_file_size_bytes = os.path.getsize(file_name)
     ori_file_size_bytes = 0 if not os.path.exists(file_name) else os.path.getsize(file_name)
 
     # Create references for signal handler
