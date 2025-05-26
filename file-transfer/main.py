@@ -16,7 +16,7 @@ This script should be run on UERANSIM machine
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
 CDN_URL = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev"
 FILE_NAME = "test.pdf"
-STAGE_1_DURATION = 30 # seconds
+STAGE_1_DURATION = 5 # seconds
 BW_MAX = 200 # Mbps
 
 logging.basicConfig(level=logging.INFO)
@@ -95,12 +95,10 @@ def start_ue(
 
 def run_scenario():
     """Constructing the scenario with time-controlled connections"""
-    output_file_1 = f"./file-x/exp_stage1_{STAGE_1_DURATION}.txt"
-    output_file_2 = "./file-x/exp_stage2.txt"
     output_file_stat = "./file-x/exp_stat.txt"
-    ensure_dir(output_file_1)
-    ensure_dir(output_file_2)
+    output_file_logging = "./file-x/exp_logging.txt"
     ensure_dir(output_file_stat)
+    ensure_dir(output_file_logging)
 
     gnb1_process = None
     ue1_process = None
@@ -109,8 +107,10 @@ def run_scenario():
 
     # Record start time for logging as timestamp 0
     start_exp = time.perf_counter()
-    with open(output_file_1, "a") as f:
+    with open(output_file_stat, "a") as f:
         f.write("[t=0] Connecting to open5gs-1...\n")
+        f.write(f"CDN URL: {CDN_URL}\n")
+        f.write(f"Duration for Stage 1: {STAGE_1_DURATION}\n")
 
     # Start gNB and UE for open5gs-1
     gnb1_process = start_gnb("config/open5gs1-gnb.yaml")
@@ -126,11 +126,11 @@ def run_scenario():
         net_interface="uesimtun0",
         file_name=FILE_NAME,
         cdn_url=CDN_URL,
-        log_file_path=output_file_1,
+        log_file_path=output_file_logging,
         timeout=STAGE_1_DURATION
     )
 
-    tcp_end_1 = time.perf_counter() # theoretically, tcp_end_1 = service_start_1 + phase_1_duration
+    curl_end_1 = time.perf_counter() # theoretically, curl_end_1 = service_start_1 + STAGE_1_DURATION
 
     # TODO(bxhu) sudo systemctl stop wondershaper.service
     stop_wondershaper_service() # must be called before uesimtun0 is killed
@@ -142,7 +142,7 @@ def run_scenario():
     gnb1_process = None
     ue1_process = None
 
-    with open(output_file_1, "a") as f:
+    with open(output_file_logging, "a") as f:
         f.write("\n[Phase 1]\n")
         f.write(f"[t = {built1_probe - start_exp}] TCP Traffic Started from {interface1_ip}...\n")
         f.write(f"[t = {service_start_1 - start_exp}] WonderShaper Service Started for Stage 1...\n")
