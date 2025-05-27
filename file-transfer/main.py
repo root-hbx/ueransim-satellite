@@ -285,10 +285,12 @@ def run_scenario():
         f.write(f"Starting Connection with open5gs2: {starting_connection_with_open5gs2:.2f}s\n")
 
 
+# Module Test
 if __name__ == "__main__":
     admin()
     try:
         STAGE_1_DURATION = 5
+        BW_MAX = 200 # Mbps
         run_scenario()
     except Exception as e:
         logging.error(f"Error for x (Stage 1 Duration) = {STAGE_1_DURATION}: {e}")
