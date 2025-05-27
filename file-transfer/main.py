@@ -233,10 +233,10 @@ def run_scenario():
         """
         
         # Step 3: Wait for curl process to terminate
-        max_wait = 1000  # 1000 * 1ms = 1000ms
+        max_wait = 10000  # 10000 * 0.01ms = 100ms
         wait_count = 0
         while curl_process and curl_process.poll() is None and wait_count < max_wait:
-            time.sleep(0.001)  # 1ms
+            time.sleep(0.00001)  # 1ms
             wait_count += 1
 
         success_sigint = time.perf_counter()
@@ -248,12 +248,12 @@ def run_scenario():
 
         with open(output_file_stat, "a") as f:
             f.write("\n[Phase 1]\n")
-            f.write(f"Connecting with open5gs-1 need {(built1_probe - start_exp):.2f}s\n")
-            f.write(f"Starting Wondershaper need {(tc_started_1 - built1_probe):.2f}s\n")
-            f.write(f"[Actual] Stage-1 curl flow is lasting for {(start_to_close_1 - tc_started_1):.2f}s\n")
-            f.write(f"[Theory] Stage-1 curl flow is lasting for {STAGE_1_DURATION:.2f}s\n")
-            f.write(f"Disconnecting with open5gs1 need {(success_close_1 - start_to_close_1):.2f}s\n")
-            f.write(f"Destructing curl process need {(success_sigint - send_sigint):.2f}s\n")
+            f.write(f"Connecting with open5gs-1 need {(built1_probe - start_exp):.4f}s\n")
+            f.write(f"Starting Wondershaper need {(tc_started_1 - built1_probe):.4f}s\n")
+            f.write(f"[Actual] Stage-1 curl flow is lasting for {(start_to_close_1 - tc_started_1):.4f}s\n")
+            f.write(f"[Theory] Stage-1 curl flow is lasting for {STAGE_1_DURATION:.4f}s\n")
+            f.write(f"Disconnecting with open5gs1 need {(success_close_1 - start_to_close_1):.4f}s\n")
+            f.write(f"Destructing curl process need {(success_sigint - send_sigint):.4f}s\n")
 
         # [Phase 2] Start gNB and UE for open5gs-2
         start_to_connect_2 = time.perf_counter()
@@ -294,9 +294,9 @@ def run_scenario():
 
         with open(output_file_stat, "a") as f:
             f.write("\n[Phase 2]\n")
-            f.write(f"Connecting with open5gs-2 need {(built2_probe - start_to_connect_2):.2f}s\n")
-            f.write(f"Restarting Wondershaper need {(tc_started_2 - built2_probe):.2f}s\n")
-            f.write(f"[Actual] Stage-2 curl flow is lasting for {(curl_end_2 - tc_started_2):.2f}s\n")
+            f.write(f"Connecting with open5gs-2 need {(built2_probe - start_to_connect_2):.4f}s\n")
+            f.write(f"Restarting Wondershaper need {(tc_started_2 - built2_probe):.4f}s\n")
+            f.write(f"[Actual] Stage-2 curl flow is lasting for {(curl_end_2 - tc_started_2):.4f}s\n")
             f.write("[Theory] No reference\n")
 
     except Exception as e:
@@ -330,17 +330,17 @@ def run_scenario():
     starting_connection_with_open5gs2 = built2_probe - start_to_connect_2
 
     with open(output_file_stat, "a") as f:
-        f.write(f"Ending Wondershaper need {(tc_end_2 - curl_end_2):.2f}s\n")
-        f.write(f"Disconnecting with open5gs2 need {(all_done - tc_end_2):.2f}s\n")
+        f.write(f"Ending Wondershaper need {(tc_end_2 - curl_end_2):.4f}s\n")
+        f.write(f"Disconnecting with open5gs2 need {(all_done - tc_end_2):.4f}s\n")
         f.write("\nStatistics:\n")
         f.write("---------------[Summary]------------------\n")
-        f.write(f"Total Program Time: {total_prog_time:.2f}s\n")
-        f.write(f"Total Experiment Time: {total_exp_time:.2f}s\n")
+        f.write(f"Total Program Time: {total_prog_time:.4f}s\n")
+        f.write(f"Total Experiment Time: {total_exp_time:.4f}s\n")
         f.write("----------[Impact of Switching]----------\n")
-        f.write(f"Switching Cost: {switching_cost:.2f}s\n")
-        f.write(f"Ending Connection with open5gs1: {ending_connection_with_open5gs1:.2f}s\n")
-        f.write(f"Ending Curl Process: {ending_curl_process:.2f}s\n")
-        f.write(f"Starting Connection with open5gs2: {starting_connection_with_open5gs2:.2f}s\n")
+        f.write(f"Switching Cost: {switching_cost:.4f}s\n")
+        f.write(f"Ending Connection with open5gs1: {ending_connection_with_open5gs1:.4f}s\n")
+        f.write(f"Ending Curl Process: {ending_curl_process:.4f}s\n")
+        f.write(f"Starting Connection with open5gs2: {starting_connection_with_open5gs2:.4f}s\n")
 
 
 # Module Test
