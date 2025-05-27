@@ -209,6 +209,12 @@ def run_scenario():
 
         with open(output_file_logging, "a") as f:
             f.write("\n[Phase 1]\n")
+            f.write(f"Connecting with open5gs-1 need {(built1_probe - start_exp):.2f}s\n")
+            f.write(f"Starting Wondershaper need {(tc_started_1 - built1_probe):.2f}s\n")
+            f.write(f"[Actual] Stage-1 curl flow is lasting for {(start_to_close_1 - tc_started_1):.2f}s\n")
+            f.write(f"[Theory] Stage-1 curl flow is lasting for {STAGE_1_DURATION:.2f}s\n")
+            f.write(f"Disconnecting with open5gs1 need {(success_close_1 - start_to_close_1):.2f}s\n")
+            f.write(f"Destructing curl process need {(success_close_1 - send_sigint):.2f}s\n")
 
         # [Phase 2] Start gNB and UE for open5gs-2
         start_to_connect_2 = time.perf_counter()
@@ -221,6 +227,7 @@ def run_scenario():
         tc_started_2 = time.perf_counter()
 
         # Phase 2: curl process without interruption
+        
         curl_completed.clear()
         curl_thread2 = fetch_file(
             net_interface="uesimtun0",
@@ -232,12 +239,18 @@ def run_scenario():
         
         # Block main thread until curl process is terminated
         curl_thread2.join()
+        curl_end_2 = time.perf_counter()
 
         with open(output_file_stat, "a") as f:
             f.write("\n[Phase 2]\n")
+            f.write(f"Connecting with open5gs-2 need {(built2_probe - start_to_connect_2):.2f}s\n")
+            f.write(f"Restarting Wondershaper need {(tc_started_2 - built2_probe):.2f}s\n")
+            f.write(f"[Actual] Stage-2 curl flow is lasting for {(curl_end_2 - tc_started_2):.2f}s\n")
+            f.write("[Theory] No reference\n")
 
     finally:
         stop_wondershaper_service()
+        tc_end_2 = time.perf_counter()
         if gnb1_process or ue1_process:
             terminate_processes(gnb1_process, ue1_process)
         if gnb2_process or ue2_process:
@@ -247,22 +260,39 @@ def run_scenario():
     logging.info(f"Results saved to {output_file_logging} and {output_file_stat}")
     logging.info("Scenario completed successfully")
 
+    ###################################################
+    # Write final statistics to the output file       #
+    ###################################################
+    total_prog_time = all_done - start_exp
+    total_exp_time = total_prog_time - (tc_started_1 - built1_probe) - (tc_started_2 - built2_probe) - (tc_end_2 - curl_end_2)
+    # Theoretically, switching_cost = ending_connection_with_open5gs1 + ending_curl_process + starting_connection_with_open5gs2
+    switching_cost = built2_probe - start_to_close_1
+    ending_connection_with_open5gs1 = success_close_1 - start_to_close_1
+    ending_curl_process = success_sigint - send_sigint
+    starting_connection_with_open5gs2 = built2_probe - start_to_connect_2
+
     with open(output_file_stat, "a") as f:
+        f.write(f"Ending Wondershaper need {(tc_end_2 - curl_end_2):.2f}s\n")
+        f.write(f"Disconnecting with open5gs2 need {(all_done - tc_end_2):.2f}s\n")
         f.write("\nStatistics:\n")
+        f.write("----------------------------------\n")
+        f.write(f"Total Program Time: {total_prog_time:.2f}s\n")
+        f.write(f"Total Experiment Time: {total_exp_time:.2f}s\n")
+        f.write("----------------------------------\n")
+        f.write(f"Switching Cost: {switching_cost:.2f}s\n")
+        f.write(f"Ending Connection with open5gs1: {ending_connection_with_open5gs1:.2f}s\n")
+        f.write(f"Ending Curl Process: {ending_curl_process:.2f}s\n")
+        f.write(f"Starting Connection with open5gs2: {starting_connection_with_open5gs2:.2f}s\n")
 
 
 if __name__ == "__main__":
     admin()
-
-    # Total Data
-    for i in range(10, 210, 10):
-        try:
-            TOTAL_TIME = i
-            DIVIDE_TIME = TOTAL_TIME / 2
-            run_scenario()
-        except Exception as e:
-            logging.error(f"Error for x (Pure TCP Time) = {TOTAL_TIME}: {e}")
-        finally:
-            time.sleep(10)
+    try:
+        STAGE_1_DURATION = 5
+        run_scenario()
+    except Exception as e:
+        logging.error(f"Error for x (Stage 1 Duration) = {STAGE_1_DURATION}: {e}")
+    finally:
+        time.sleep(10)
 
 
