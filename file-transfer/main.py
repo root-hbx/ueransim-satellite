@@ -174,6 +174,7 @@ def run_scenario():
         # Step 1: Terminate open5gs1 connection
         logging.info("Step 1: Terminating open5gs1 connection...")
         start_to_close_1 = time.perf_counter()
+        
         terminate_processes(gnb1_process, ue1_process)
         gnb1_process = None
         ue1_process = None
@@ -189,7 +190,6 @@ def run_scenario():
         logging.info("Step 2: Sending SIGINT to curl process...")
         send_sigint_to_curl() # async, non-blocking
         send_sigint = time.perf_counter()
-        logging.info("Step 2 completed: SIGINT sent to curl")
         """
         send SIGINT to curl process, simulating Ctrl+C
         """
@@ -214,10 +214,14 @@ def run_scenario():
             f.write(f"[Actual] Stage-1 curl flow is lasting for {(start_to_close_1 - tc_started_1):.2f}s\n")
             f.write(f"[Theory] Stage-1 curl flow is lasting for {STAGE_1_DURATION:.2f}s\n")
             f.write(f"Disconnecting with open5gs1 need {(success_close_1 - start_to_close_1):.2f}s\n")
-            f.write(f"Destructing curl process need {(success_close_1 - send_sigint):.2f}s\n")
+            f.write(f"Destructing curl process need {(success_sigint - send_sigint):.2f}s\n")
 
         # [Phase 2] Start gNB and UE for open5gs-2
         start_to_connect_2 = time.perf_counter()
+        with open(output_file_stat, "a") as f:
+            f.write(f"\n[t={start_to_connect_2 - start_exp}] Connecting to open5gs-2...\n")
+            f.write(f"CDN URL: {CDN_URL}\n")
+            f.write("Duration for Stage 2: TBD\n")
         
         gnb2_process = start_gnb("config/open5gs2-gnb.yaml")
         ue2_process = start_ue("config/open5gs2-ue.yaml")
@@ -227,7 +231,6 @@ def run_scenario():
         tc_started_2 = time.perf_counter()
 
         # Phase 2: curl process without interruption
-        
         curl_completed.clear()
         curl_thread2 = fetch_file(
             net_interface="uesimtun0",
@@ -275,10 +278,10 @@ def run_scenario():
         f.write(f"Ending Wondershaper need {(tc_end_2 - curl_end_2):.2f}s\n")
         f.write(f"Disconnecting with open5gs2 need {(all_done - tc_end_2):.2f}s\n")
         f.write("\nStatistics:\n")
-        f.write("----------------------------------\n")
+        f.write("---------------[Summary]------------------\n")
         f.write(f"Total Program Time: {total_prog_time:.2f}s\n")
         f.write(f"Total Experiment Time: {total_exp_time:.2f}s\n")
-        f.write("----------------------------------\n")
+        f.write("----------[Impact of Switching]----------\n")
         f.write(f"Switching Cost: {switching_cost:.2f}s\n")
         f.write(f"Ending Connection with open5gs1: {ending_connection_with_open5gs1:.2f}s\n")
         f.write(f"Ending Curl Process: {ending_curl_process:.2f}s\n")
