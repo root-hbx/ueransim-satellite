@@ -18,3 +18,12 @@ def stop_wondershaper_service() -> None:
     except subprocess.CalledProcessError as e:
         logging.error(f"Error stopping wondershaper service: {e}")
 
+def restart_wondershaper_service() -> None:
+    """Restart the wondershaper service"""
+    try:
+        subprocess.run(["sudo", "systemctl", "restart", "wondershaper.service"], check=True)
+        logging.info("Wondershaper service restarted")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error restarting wondershaper service: {e}")
+
+
