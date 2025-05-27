@@ -126,8 +126,19 @@ def fetch_file(
             curl_process = process
             
             stdout, stderr = process.communicate()
+            
+            process_was_interrupted = False
+            if process.returncode == -signal.SIGINT or process.returncode == -2:
+                # 进程被SIGINT中断
+                process_was_interrupted = True
+                download_interrupted_ref[0] = True
+            elif process.returncode < 0:
+                # 进程被其他信号终止
+                process_was_interrupted = True
+                download_interrupted_ref[0] = True
 
             with open(log_file_path, 'a', encoding='utf-8') as log_file_handle:
+                log_file_handle.write(f"Process return code: {process.returncode}\n")
                 if stdout:
                     log_file_handle.write("=== STDOUT ===\n")
                     log_file_handle.write(stdout)
@@ -137,7 +148,7 @@ def fetch_file(
                     log_file_handle.write(stderr)
                     log_file_handle.write("\n")
 
-            if download_interrupted_ref[0]:
+            if download_interrupted_ref[0] or process_was_interrupted:
                 # Ctrl+C by "user manually" or "timeout reached"
                 if os.path.exists(file_name) and start_time_ref[0] is not None:
                     end_time = time.perf_counter()

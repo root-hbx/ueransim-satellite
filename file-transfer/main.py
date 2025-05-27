@@ -23,7 +23,7 @@ ROOT_DIR = "/home/ueransim/ueransim-satellite"
 # FILE_NAME = "test.bin"
 CDN_URL = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev/lecture12_SupML_buluc24.pdf"
 FILE_NAME = "test.pdf"
-STAGE_1_DURATION = 10 # seconds
+STAGE_1_DURATION = 30 # seconds
 BW_MAX = 200 # Mbps
 
 logging.basicConfig(level=logging.INFO)
@@ -114,12 +114,47 @@ def send_sigint_to_curl() -> None:
     if curl_process and curl_process.poll() is None:
         logging.info("Sending SIGINT to curl process...")
         try:
-            os.killpg(os.getpgid(curl_process.pid), signal.SIGINT)
+            # 使用 send_signal 而不是 killpg，这样更接近真实的Ctrl+C
+            curl_process.send_signal(signal.SIGINT)
             logging.info("SIGINT sent to curl process successfully")
         except Exception as e:
             logging.error(f"Error sending SIGINT to curl: {e}")
+            # 如果SIGINT失败，尝试terminate
+            try:
+                curl_process.terminate()
+                logging.info("Curl process terminated")
+            except Exception as kill_e:
+                logging.error(f"Error terminating curl process: {kill_e}")
     else:
         logging.warning("Curl process not found or already terminated")
+
+
+def cleanup_all_processes():
+    global curl_process
+    
+    logging.info("Starting cleanup of all processes...")
+    
+    if curl_process and curl_process.poll() is None:
+        try:
+            curl_process.kill()
+            curl_process.wait(timeout=3)
+            logging.info("Curl process cleaned up")
+        except Exception as e:
+            logging.error(f"Error cleaning up curl process: {e}")
+    
+    try:
+        subprocess.run(["pkill", "-f", "curl.*uesimtun0"], 
+                      stdout=subprocess.DEVNULL, 
+                      stderr=subprocess.DEVNULL)
+        subprocess.run(["pkill", "curl"], 
+                      stdout=subprocess.DEVNULL, 
+                      stderr=subprocess.DEVNULL)
+        logging.info("All curl processes killed")
+    except:
+        pass
+
+    curl_process = None
+    curl_completed.clear()
 
 
 def run_scenario():
@@ -207,6 +242,7 @@ def run_scenario():
         success_sigint = time.perf_counter()
         if wait_count >= max_wait:
             logging.warning("Curl process taking too long to terminate")
+            cleanup_all_processes()
         else:
             logging.info(f"Curl process terminated after {wait_count}ms")
 
@@ -245,7 +281,15 @@ def run_scenario():
         )
         
         # Block main thread until curl process is terminated
-        curl_thread2.join()
+        try:
+            curl_thread2.join(timeout=120)  # 最多等待2分钟
+            if curl_thread2.is_alive():
+                logging.warning("Curl thread still alive after timeout, forcing cleanup")
+                cleanup_all_processes()
+        except Exception as e:
+            logging.error(f"Error joining curl thread: {e}")
+            cleanup_all_processes()
+        
         curl_end_2 = time.perf_counter()
 
         with open(output_file_stat, "a") as f:
@@ -255,6 +299,11 @@ def run_scenario():
             f.write(f"[Actual] Stage-2 curl flow is lasting for {(curl_end_2 - tc_started_2):.2f}s\n")
             f.write("[Theory] No reference\n")
 
+    except Exception as e:
+        logging.error(f"Exception in run_scenario: {e}")
+        cleanup_all_processes()
+        raise
+
     finally:
         stop_wondershaper_service()
         tc_end_2 = time.perf_counter()
@@ -262,6 +311,8 @@ def run_scenario():
             terminate_processes(gnb1_process, ue1_process)
         if gnb2_process or ue2_process:
             terminate_processes(gnb2_process, ue2_process)
+
+        send_sigint_to_curl() # async, non-blocking
         all_done = time.perf_counter()
 
     logging.info(f"Results saved to {output_file_logging} and {output_file_stat}")
@@ -296,12 +347,18 @@ def run_scenario():
 if __name__ == "__main__":
     admin()
     try:
-        STAGE_1_DURATION = 15
+        STAGE_1_DURATION = 30
         BW_MAX = 200 # Mbps
         run_scenario()
+    except KeyboardInterrupt:
+        logging.info("Program interrupted by user")
+        cleanup_all_processes()
     except Exception as e:
         logging.error(f"Error for x (Stage 1 Duration) = {STAGE_1_DURATION}: {e}")
+        cleanup_all_processes()
     finally:
-        time.sleep(10)
-
+        cleanup_all_processes()
+        time.sleep(2)
+        logging.info("Program exiting...")
+        os._exit(0)
 
