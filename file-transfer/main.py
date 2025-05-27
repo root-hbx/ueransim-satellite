@@ -19,9 +19,11 @@ This script should be run on UERANSIM machine
 
 # Pls replace with your own path
 ROOT_DIR = "/home/ueransim/ueransim-satellite"
-CDN_URL = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev"
+# CDN_URL = "https://httpbin.org/drip?numbytes=104857600&duration=30&delay=1"
+# FILE_NAME = "test.bin"
+CDN_URL = "https://pub-cf250a7dff0b40dea71497e179a340b7.r2.dev/lecture12_SupML_buluc24.pdf"
 FILE_NAME = "test.pdf"
-STAGE_1_DURATION = 5 # seconds
+STAGE_1_DURATION = 10 # seconds
 BW_MAX = 200 # Mbps
 
 logging.basicConfig(level=logging.INFO)
@@ -156,7 +158,8 @@ def run_scenario():
             file_name=FILE_NAME,
             cdn_url=CDN_URL,
             log_file_path=output_file_logging,
-            interrupt_after=None
+            timeout=None,
+            return_thread=True
         ) # async, non-blocking
         """
         - "curl process" -> curl_process <Popen Obj, PID=12345>
@@ -207,7 +210,7 @@ def run_scenario():
         else:
             logging.info(f"Curl process terminated after {wait_count}ms")
 
-        with open(output_file_logging, "a") as f:
+        with open(output_file_stat, "a") as f:
             f.write("\n[Phase 1]\n")
             f.write(f"Connecting with open5gs-1 need {(built1_probe - start_exp):.2f}s\n")
             f.write(f"Starting Wondershaper need {(tc_started_1 - built1_probe):.2f}s\n")
@@ -237,7 +240,8 @@ def run_scenario():
             file_name=FILE_NAME,
             cdn_url=CDN_URL,
             log_file_path=output_file_logging,
-            interrupt_after=None
+            timeout=None,
+            return_thread=True
         )
         
         # Block main thread until curl process is terminated
@@ -292,7 +296,7 @@ def run_scenario():
 if __name__ == "__main__":
     admin()
     try:
-        STAGE_1_DURATION = 5
+        STAGE_1_DURATION = 15
         BW_MAX = 200 # Mbps
         run_scenario()
     except Exception as e:
